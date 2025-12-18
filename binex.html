@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Elite Exchange – Arbitrage</title>
+
+<style>
+/* --- DARK MODE VARIABLES (DEFAULT) --- */
+:root[data-theme="dark"]{
+  --bg:#020617;
+  --card:#0f172a;
+  --card2:#111827;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --nav-bg: #1e293b;
+  --summary-text: #e5e7eb;
+}
+
+/* --- LIGHT MODE VARIABLES --- */
+:root[data-theme="light"]{
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --card2:#f1f5f9;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --nav-bg: #ffffff;
+  --summary-text: #1f2937;
+}
+
+/* --- COMMON COLOR VARIABLES (unchanged by theme) --- */
+:root{
+  --green:#22c55e;
+  --red:#ef4444;
+  --blue:#3b82f6;
+  --yellow:#f59e0b;
+  --purple: #8b5cf6; /* Added for Trade Profit card */
+  --orange: #f97316; /* Added for Withdraw card */
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.app{
+  max-width:430px;
+  margin:auto;
+  min-height:100vh;
+  padding-bottom:80px;
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:var(--bg);
+  padding:14px;
+  border-bottom:1px solid #1f2937;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* Light mode adjustments for header */
+:root[data-theme="light"] header {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:800;
+}
+
+.logo-icon{
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  background:linear-gradient(135deg,#2563eb,#22c55e);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-right:4px;
+}
+
+.card{
+  background:linear-gradient(180deg,var(--card),var(--card2));
+  margin:12px;
+  padding:14px;
+  border-radius:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,.5);
+}
+
+/* Light mode adjustments for card shadow */
+:root[data-theme="light"] .card {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+}
+
+h3{margin:0 0 10px;font-size:15px}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.stat{
+  border-radius:14px;
+  padding:12px;
+  font-size:12px;
+  min-height:70px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.stat strong { font-size: 16px; }
+
+/* --- ACCOUNT SUMMARY STATS (NEW STYLES) --- */
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.summary-stat {
+    padding: 20px 15px;
+    border-radius: 16px;
+    color: var(--summary-text);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.summary-stat h4 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: var(--summary-text);
+    font-weight: 500;
+}
+
+.summary-stat strong {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.summary-stat-blue { background-color: var(--blue); }
+.summary-stat-orange { background-color: var(--orange); }
+.summary-stat-green { background-color: var(--green); }
+.summary-stat-purple { background-color: var(--purple); }
+
+/* Ensure text is readable in Light Mode on colored cards */
+:root[data-theme="light"] .summary-stat-blue,
+:root[data-theme="light"] .summary-stat-orange,
+:root[data-theme="light"] .summary-stat-green,
+:root[data-theme="light"] .summary-stat-purple {
+    color: white; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+th,td{
+  padding:8px;
+  border-bottom:1px solid #1f2937;
+  text-align:left;
+}
+
+/* Light mode adjustments for table */
+:root[data-theme="light"] th, 
+:root[data-theme="light"] td {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+th{color:var(--muted)}
+
+button{
+  border:none;
+  border-radius:8px;
+  padding:6px 10px;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  font-size:12px;
+  cursor:pointer;
+  transition:background 0.2s;
+}
+button:hover {
+  opacity: 0.9;
+}
+
+/* Mode Switch Styles */
+.mode-switch {
+  display: flex;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid #1f2937;
+}
+:root[data-theme="light"] .mode-switch {
+    background: var(--card2);
+    border: 1px solid #e2e8f0;
+}
+
+.mode-switch button {
+  flex-grow: 1;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  border: none;
+  box-shadow: none;
+}
+.mode-switch button.active {
+  background: var(--blue);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+:root[data-theme="light"] .mode-switch button.active {
+    color: white; /* Keep active button text white in light mode */
+}
+.header-mode {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: 8px;
+  font-weight: normal;
+}
+
+/* Header Balance Styles */
+#headerBalance {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 10px;
+    line-height: 1.2;
+    margin-right: 8px; /* Space before bell */
+}
+#headerBalance .usd-value {
+    color: var(--text);
+    font-weight: 700;
+    font-size: 13px;
+}
+#headerBalance .btc-value {
+    color: var(--muted);
+}
+
+
+input{
+  background:var(--bg);
+  border:1px solid #1f2937;
+  color:var(--text);
+  border-radius:8px;
+  padding:6px;
+  width:80px;
+  margin-left: 8px;
+}
+:root[data-theme="light"] input {
+    background: white;
+    border: 1px solid #e2e8f0;
+}
+
+/* ===== HAMBURGER MENU ===== */
+.menu-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  z-index:50;
+}
+
+.menu{
+  position:fixed;
+  top:0;
+  /* MODIFIED: Changed from right to left for slide-in */
+  left:-300px; 
+  width:280px;
+  height:100%;
+  background:var(--bg);
+  /* MODIFIED: Changed border-left to border-right */
+  border-right:1px solid #1f2937;
+  padding:16px;
+  transition:0.3s;
+  z-index:60;
+  overflow-y:auto;
+}
+:root[data-theme="light"] .menu {
+    border-right:1px solid #e2e8f0;
+}
+
+.menu.open{ left:0; } /* MODIFIED: Menu opens to left: 0 */
+
+.menu-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.menu h4{
+  margin:16px 0 6px;
+  font-size:12px;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+.menu a{
+  display:block;
+  padding:10px;
+  border-radius:10px;
+  text-decoration:none;
+  color:var(--text);
+  font-size:14px;
+}
+
+.menu a:hover{ background:#111827; }
+:root[data-theme="light"] .menu a:hover {
+    background:#e2e8f0;
+}
+
+
+.menu .logout{
+  margin-top:20px;
+  background:#7f1d1d;
+  text-align:center;
+}
+
+/* ===== BOTTOM NAVIGATION ===== */
+#bottomNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: var(--nav-bg);
+    border-top: 1px solid #1f2937;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 430px;
+    margin: 0 auto;
+    z-index: 50;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+}
+:root[data-theme="light"] #bottomNav {
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+}
+
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 4px;
+    flex: 1;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.nav-item.active {
+    color: var(--blue);
+}
+
+.nav-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+/* View Container Styles */
+.view-container {
+    display: none;
+}
+.view-container.active {
+    display: block;
+}
+
+.settings-content {
+    padding: 20px 12px;
+}
+
+/* ===== MODAL STYLES (COMMON) ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 70;
+    padding: 20px;
+}
+
+.modal-content {
+    background: var(--card);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 350px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+:root[data-theme="light"] .modal-content {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-content.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.trade-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed #1f2937;
+}
+:root[data-theme="light"] .trade-row {
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+
+.trade-row:last-of-type {
+    border-bottom: none;
+}
+
+.trade-label {
+    color: var(--muted);
+}
+
+.trade-value {
+    font-weight: 600;
+}
+
+/* ===== SUCCESS NOTIFICATION SPECIFIC STYLES ===== */
+#tradeNotificationModal .modal-content {
+    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4);
+}
+:root[data-theme="light"] #tradeNotificationModal .modal-content {
+    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.2);
+}
+
+#tradeNotificationModal .modal-header {
+    border-bottom: 2px solid var(--green);
+}
+#tradeNotificationModal .modal-header h2 {
+    color: var(--green);
+}
+.trophy-icon {
+    font-size: 36px;
+    line-height: 1;
+    margin-right: 10px;
+}
+.profit-earned .trade-value {
+    color: var(--yellow);
+    font-size: 16px;
+}
+.total-balance-row {
+    padding-top: 15px;
+    margin-top: 10px;
+    border-top: 1px solid #1f2937;
+    font-size: 16px;
+}
+:root[data-theme="light"] .total-balance-row {
+    border-top: 1px solid #e2e8f0;
+}
+.confirmation-message {
+    background: #064e3b; /* Darker green background */
+    color: var(--green);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+:root[data-theme="light"] .confirmation-message {
+    background: #d1fae5; 
+    color: #065f46;
+}
+
+.confirmation-message span {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+
+/* ===== EXECUTION MODAL SPECIFIC STYLES ===== */
+#tradeExecutionModal .modal-header h2 {
+    color: var(--blue);
+}
+#tradeExecutionModal .modal-header {
+    border-bottom: 2px solid var(--blue);
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text);
+    font-weight: 600;
+}
+.input-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 16px;
+    text-align: right;
+}
+
+.trade-summary-info {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 5px 0;
+}
+.trade-summary-info strong {
+    color: var(--text);
+}
+.trade-summary-info.error {
+    color: var(--red);
+    font-weight: bold;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.action-buttons button {
+    flex-grow: 1;
+    padding: 12px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    background: var(--blue);
+}
+.action-buttons button:disabled {
+    background: #4b5563;
+    cursor: not-allowed;
+}
+
+/* Price/Value Fluctuations */
+.price-up {
+    color: var(--green) !important;
+    animation: pulse-green 0.5s ease-out;
+}
+.price-down {
+    color: var(--red) !important;
+    animation: pulse-red 0.5s ease-out;
+}
+
+@keyframes pulse-green {
+    0% { background-color: rgba(34, 197, 94, 0); }
+    50% { background-color: rgba(34, 197, 94, 0.2); }
+    100% { background-color: rgba(34, 197, 94, 0); }
+}
+
+@keyframes pulse-red {
+    0% { background-color: rgba(239, 68, 68, 0); }
+    50% { background-color: rgba(239, 68, 68, 0.2); }
+    100% { background-color: rgba(239, 68, 68, 0); }
+}
+
+.price-cell, .wallet-cell {
+    position: relative;
+    padding: 8px;
+    text-align: left;
+    transition: background-color 0.1s;
+}
+
+/* New Flash Effects for Wallet */
+@keyframes flash-green {
+    0% { background-color: rgba(34, 197, 94, 0); }
+    50% { background-color: rgba(34, 197, 94, 0.4); }
+    100% { background-color: rgba(34, 197, 94, 0); }
+}
+@keyframes flash-red {
+    0% { background-color: rgba(239, 68, 68, 0); }
+    50% { background-color: rgba(239, 68, 68, 0.4); }
+    100% { background-color: rgba(239, 68, 68, 0); }
+}
+.usd-flash-up, .btc-flash-up { animation: flash-green 0.6s ease-out; }
+.usd-flash-down, .btc-flash-down { animation: flash-red 0.6s ease-out; }
+
+
+/* New Activity Log Styles */
+.activity-log {
+    height: 150px;
+    overflow-y: scroll;
+    background: #0000004d; /* Darker background */
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+:root[data-theme="light"] .activity-log {
+    background: #e2e8f0; 
+}
+
+.log-entry {
+    border-bottom: 1px dotted #1f2937;
+    padding: 3px 0;
+}
+:root[data-theme="light"] .log-entry {
+    border-bottom: 1px dotted #cbd5e1;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+.log-time {
+    color: var(--muted);
+    margin-right: 6px;
+    font-weight: 500;
+}
+.log-system { color: var(--blue); }
+.log-opportunity { color: var(--yellow); }
+.log-trade { color: var(--green); font-weight: 600; }
+
+/* Theme Switch Button Styling */
+.theme-switch-container {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-top: 10px;
+}
+.theme-switch-btn {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+}
+.theme-dark { background: #1f2937; }
+.theme-light { background: #f1f5f9; color: #1f2937; }
+</style>
+</head>
+
+<body>
+
+<div class="menu-overlay" onclick="toggleMenu()"></div>
+
+<div class="menu" id="menu">
+  <div class="menu-header">
+    <strong>Elite Exchange</strong>
+    <button onclick="toggleMenu()">✕</button>
+  </div>
+    <h4>Account</h4>
+  <a href="#">👤 My Profile</a>
+  <a href="#">🛂 KYC Verification</a>
+  <a href="#">🔐 Security & 2FA</a>
+
+  <h4>Wallet</h4>
+  <a href="#">💼 Wallet Balances</a>
+  <a href="#">➕ Deposit</a>
+  <a href="#">➖ Withdraw</a>
+  <a href="#">🔁 Transfer Funds</a>
+
+  <h4>Trading</h4>
+  <a href="#">📊 Arbitrage Dashboard</a>
+  <a href="#">🕒 Recent Trades</a>
+  <a href="#">📂 Trade History</a>
+
+  <h4>Bot & Automation</h4>
+  <a href="#">🤖 Auto-Arbitrage Bot</a>
+  <a href="#">⚙️ Bot Settings</a>
+
+  <h4>Analytics</h4>
+  <a href="#">📈 Performance</a>
+  <a href="#">💰 Profit & Fees</a>
+
+  <a href="#" class="logout">🚪 Logout</a>
+</div>
+
+<div id="tradeExecutionModal" class="modal-overlay" onclick="hideTradeExecutionModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h2 id="modalTradeTitle">Execute Arbitrage Trade</h2>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--muted);" id="modalTradeDetails">
+                    Buy on [Ex1] / Sell on [Ex2]
+                </p>
+            </div>
+            <button class="close-btn" onclick="hideTradeExecutionModal()">✕</button>
+        </div>
+
+        <div class="input-group">
+            <label for="tradeStakeInput">Stake (BTC Amount)</label>
+            <input type="number" id="tradeStakeInput" step="0.0001" min="0.0001" value="0.01" oninput="updateTradeExecutionSummary()">
+        </div>
+
+        <div id="executionSummary">
+            </div>
+
+        <div class="action-buttons">
+            <button id="confirmTradeBtn" onclick="confirmTrade()">Confirm Trade</button>
+        </div>
+        
+    </div>
+</div>
+
+
+<div id="tradeNotificationModal" class="modal-overlay" onclick="hideTradeNotification()">
+    <div class="modal-content trade-modal" onclick="event.stopPropagation()">
+        <div class="modal-header trade-modal-header">
+            <div>
+                <span class="trophy-icon" style="color:var(--green)">🏆🎉</span>
+                <h2>Trade Completed!</h2>
+                <p style="margin: 4px 0 0 0 0; font-size: 12px; color: var(--green);">Trade executed successfully.</p>
+            </div>
+            <button class="close-btn" onclick="hideTradeNotification()">✕</button>
+        </div>
+
+        <div id="modalContent">
+            <div class="trade-row">
+                <span class="trade-label">Transaction:</span>
+                <span class="trade-value" id="modalTradeType">Arbitrage</span>
+            </div>
+            <div class="trade-row">
+                <span class="trade-label">Buy @:</span>
+                <span class="trade-value" id="modalBuyPrice">--</span>
+            </div>
+             <div class="trade-row">
+                <span class="trade-label">Sell @:</span>
+                <span class="trade-value" id="modalSellPrice">--</span>
+            </div>
+            <div class="trade-row">
+                <span class="trade-label">Amount Traded:</span>
+                <span class="trade-value" id="modalAmount">0.00 BTC</span>
+            </div>
+            
+            <div class="trade-row profit-earned">
+                <span class="trade-label">Profit Earned:</span>
+                <span class="trade-value" id="modalProfit">+0.00</span>
+            </div>
+            
+            <div class="trade-row total-balance-row">
+                <span class="trade-label">Total Aggregated USD Balance:</span>
+                <span class="trade-value" id="modalTotalBalance">$0.00</span>
+            </div>
+        </div>
+        
+        <div class="confirmation-message">
+            <span>✅</span> 
+            <span id="modalConfirmationText">Your account has been updated!</span>
+        </div>
+    </div>
+</div>
+
+<div class="app">
+
+<header>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="cursor:pointer; font-size:20px; color:var(--text);" onclick="toggleMenu()">☰</span> 
+    <div class="logo">
+      <div class="logo-icon">E</div>
+      Elite Exchange
+      <div id="latencyIndicator" style="display:flex; align-items:center; gap:4px; font-size:10px; margin-left:10px; opacity: 0.8;">
+          <span id="latencyDot" style="width:8px; height:8px; border-radius:50%; background:var(--green)"></span>
+          <span id="latencyText" style="color:var(--muted); font-weight: 600;">0 ms</span>
+      </div>
+      <span id="headerMode" class="header-mode" style="background:var(--green)">Demo</span>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;font-size:20px; color:var(--text);">
+    
+    <div id="headerBalance">
+        </div>
+    
+    🔔 
+    </div>
+</header>
+
+<div id="dashboard" class="view-container active">
+    <div class="card">
+      <h3>Account Mode</h3>
+      <div class="mode-switch">
+        <button id="modeDemo" class="active" onclick="toggleMode('Demo')">DEMO</button>
+        <button id="modeLive" onclick="toggleMode('Live')">LIVE</button>
+      </div>
+    </div>
+    
+    <div class="card">
+        <h3>Account Summary</h3>
+        <div class="summary-stats" id="accountSummaryContainer">
+            </div>
+    </div>
+
+    <div class="card">
+      <h3>Quick Stats</h3>
+      <div class="stats" id="quickStatsContainer">
+        <div class="stat" style="background:linear-gradient(135deg,#2563eb,#3b82f6)">
+            Portfolio Value<br>
+            <strong>$0.00</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,#22c55e,#4ade80)">
+            Session PnL<br>
+            <strong>+$0.00</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,#f97316,#fb923c)">
+            Successful Trades<br>
+            <strong>0/0</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,#a855f7,#c084fc)">
+            Total Trades<br>
+            <strong>0</strong>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+        <h3>Arbitrage Performance</h3>
+        <div class="stats" id="arbitragePerformanceContainer">
+            </div>
+    </div>
+    <div class="card">
+      <h3>Market Prices (BTC/USD)</h3>
+      <table id="priceTable">
+        <thead>
+          <tr><th>Exchange</th><th>Price</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Wallet Balances</h3>
+      <table id="walletTable">
+        <thead>
+          <tr><th>Exchange</th><th>USD</th><th>BTC</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    
+    <div class="card">
+        <h3>Live Activity Log</h3>
+        <div id="activityLog" class="activity-log">
+            </div>
+    </div>
+</div>
+
+<div id="opportunities" class="view-container">
+    <div class="card">
+      <h3>Arbitrage Opportunities</h3>
+      Min Profit %
+      <input id="minProfit" type="number" value="0.2" onchange="renderOpportunityTable()">
+      <table id="oppTable">
+        <thead>
+          <tr><th>Buy</th><th>Sell</th><th>Profit %</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+</div>
+
+<div id="runningTrades" class="view-container">
+    <div class="card">
+      <h3>Recent Trades</h3>
+      <table id="tradeTable">
+        <thead>
+          <tr><th>Time</th><th>Buy</th><th>Sell</th><th>Profit</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top: 20px;">
+        <h3 style="color:var(--muted)">Trade History Note</h3>
+        <p style="font-size: 12px; color: var(--muted)">
+            This list shows all trades executed in the current mode session. In a live system, this would show real-time order fills.
+        </p>
+    </div>
+</div>
+
+<div id="settings" class="view-container">
+    <div class="settings-content">
+        <h2>General Settings</h2>
+        
+        <div class="card" style="margin-top: 15px;">
+            <h3>Theme Selector</h3>
+            <p style="font-size: 12px; color: var(--muted)">
+                Switch between dark and light mode for the user interface.
+            </p>
+            <div class="theme-switch-container">
+                <strong>Current Theme: <span id="currentThemeDisplay">Dark</span></strong>
+                <div>
+                    <button id="themeDarkBtn" class="theme-switch-btn theme-dark" onclick="toggleTheme('dark')">Dark</button>
+                    <button id="themeLightBtn" class="theme-switch-btn theme-light" onclick="toggleTheme('light')">Light</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 15px;">
+            <h3>Trade Automation</h3>
+            <p style="font-size: 12px; color: var(--muted)">
+                Enable the automatic bot to execute profitable arbitrage trades based on your criteria.
+            </p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <strong>Auto-Trade Bot Status:</strong>
+                <button style="background: var(--red);">OFFLINE</button>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 15px;">
+            <h3>Notifications</h3>
+            <p style="font-size: 12px; color: var(--muted)">
+                Control when you receive alerts for new opportunities or completed trades.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px; margin-top: 10px;">
+                <label style="display:flex; justify-content:space-between">
+                    <span>Alert on > 0.5% profit:</span>
+                    <input type="checkbox" checked>
+                </label>
+                <label style="display:flex; justify-content:space-between">
+                    <span>Notify on trade completion:</span>
+                    <input type="checkbox">
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<nav id="bottomNav">
+    <div class="nav-item active" onclick="showView('dashboard', this)">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="showView('opportunities', this)">
+        <span class="nav-icon">🔍</span>
+        <span>Opportunities</span>
+    </div>
+    <div class="nav-item" onclick="showView('runningTrades', this)">
+        <span class="nav-icon">📈</span>
+        <span>Trades</span>
+    </div>
+    <div class="nav-item" onclick="showView('settings', this)">
+        <span class="nav-icon">⚙️</span>
+        <span>Settings</span>
+    </div>
+</nav>
+
+<script>
+// Global state and constants
+const EXCHANGES = ["Binex", "KrakenX", "GatePro", "CoinArena"];
+let accountMode = 'Demo'; // State variable for account mode
+let currentView = 'dashboard'; // State variable for current view
+let currentTheme = 'dark'; // State variable for theme
+let prices = {};
+let previousPrices = {}; // Store previous prices for color comparison
+let wallets = {};
+let trades = [];
+let pendingTrade = { buy: null, sell: null, buyPrice: 0, sellPrice: 0 }; // State for the trade execution modal
+
+// NEW: Arbitrage Stats Tracker
+let arbitrageStats = {
+    maxSpreadPct: 0,
+    totalProfitUSD: 0,
+    totalProfitBTC: 0, // NEW: Track BTC profit
+    totalDepositsUSD: 5000, // Placeholder initial value
+    totalWithdrawalsUSD: 1200, // Placeholder initial value
+};
+
+// Activity log array and initial value tracker
+let activityLog = []; 
+let initialTotalValueUSD = 0; 
+let walletUpdates = {}; // Tracks recent wallet changes for visual feedback
+
+// Initial demo/live wallet data
+const initialDemoWallets = {
+    "Binex": { USD: 10000, BTC: 1.2 },
+    "KrakenX": { USD: 15000, BTC: 0.8 },
+    "GatePro": { USD: 5000, BTC: 2.5 },
+    "CoinArena": { USD: 20000, BTC: 0.5 },
+};
+
+const initialLiveWallets = {
+    "Binex": { USD: 200, BTC: 0.005 },
+    "KrakenX": { USD: 50, BTC: 0.01 },
+    "GatePro": { USD: 1000, BTC: 0.02 },
+    "CoinArena": { USD: 800, BTC: 0.001 },
+};
+
+// --- Initialization ---
+
+// Helper function to calculate current total portfolio value
+function calculateTotalPortfolioValue(currentWallets) {
+    let totalUSD = 0;
+    let totalBTC = 0;
+    
+    EXCHANGES.forEach(ex => {
+        totalUSD += currentWallets[ex].USD;
+        totalBTC += currentWallets[ex].BTC;
+    });
+
+    // Use average market price for BTC valuation
+    const currentBTCPrice = Object.values(prices).length > 0 ? 
+        Object.values(prices).reduce((a, b) => a + b, 0) / EXCHANGES.length : 60000;
+    
+    return totalUSD + (totalBTC * currentBTCPrice);
+}
+
+function initWallets(mode) {
+    if (mode === 'Live') {
+        wallets = JSON.parse(JSON.stringify(initialLiveWallets));
+    } else {
+        wallets = JSON.parse(JSON.stringify(initialDemoWallets));
+    }
+    
+    // Reset arbitrage stats on mode change, but keep placeholder deposits/withdrawals
+    const depositTemp = arbitrageStats.totalDepositsUSD;
+    const withdrawTemp = arbitrageStats.totalWithdrawalsUSD;
+    
+    arbitrageStats = {
+        maxSpreadPct: 0,
+        totalProfitUSD: 0,
+        totalProfitBTC: 0,
+        totalDepositsUSD: depositTemp, 
+        totalWithdrawalsUSD: withdrawTemp, 
+    };
+
+    // Calculate and store initial total value using current prices
+    initialTotalValueUSD = calculateTotalPortfolioValue(wallets);
+    
+    // Initialize walletUpdates tracker
+    EXCHANGES.forEach(ex => walletUpdates[ex] = { USD: 0, BTC: 0 });
+    
+    // Log initialization
+    activityLog = []; // Clear log on re-init
+    if (mode === 'Demo') {
+        logActivity('Demo session initiated. Wallets funded.', 'system');
+    } else {
+        logActivity('Live trading connection established.', 'system');
+    }
+    logActivity(`Initial Portfolio Value: $${initialTotalValueUSD.toFixed(2)}`, 'system');
+}
+
+function initPrices() {
+    EXCHANGES.forEach(ex => {
+        const initialPrice = 60000 + (Math.random() * 500 - 250);
+        prices[ex] = initialPrice;
+        previousPrices[ex] = initialPrice; // Set initial previous price
+    });
+}
+
+// --- Logging Function ---
+function logActivity(message, type = 'system') {
+    const time = new Date().toLocaleTimeString();
+    activityLog.unshift({ time, message, type });
+    // Keep log limited in size
+    if (activityLog.length > 30) {
+        activityLog.pop();
+    }
+}
+
+
+// --- Modals (Common Helpers) ---
+
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    const content = modal.querySelector('.modal-content');
+    content.classList.remove('show');
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    const content = modal.querySelector('.modal-content');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        content.classList.add('show');
+    }, 10);
+}
+
+// --- Trade Execution Modal Functions ---
+
+function hideTradeExecutionModal() {
+    hideModal('tradeExecutionModal');
+}
+
+function openTradeExecutionModal(buyEx, sellEx) {
+    const buyPrice = prices[buyEx];
+    const sellPrice = prices[sellEx];
+
+    pendingTrade = {
+        buy: buyEx,
+        sell: sellEx,
+        buyPrice: buyPrice,
+        sellPrice: sellPrice
+    };
+
+    document.getElementById('modalTradeDetails').textContent = `Buy on ${buyEx} @ $${buyPrice.toFixed(2)} / Sell on ${sellEx} @ $${sellPrice.toFixed(2)}`;
+
+    const defaultStake = accountMode === 'Live' ? 0.005 : 0.05;
+    document.getElementById('tradeStakeInput').value = defaultStake.toFixed(4);
+    
+    updateTradeExecutionSummary();
+
+    showModal('tradeExecutionModal');
+}
+
+function updateTradeExecutionSummary() {
+    const stakeInput = document.getElementById('tradeStakeInput');
+    const summaryDiv = document.getElementById('executionSummary');
+    const confirmBtn = document.getElementById('confirmTradeBtn');
+    
+    const size = parseFloat(stakeInput.value);
+    
+    if (isNaN(size) || size <= 0) {
+        summaryDiv.innerHTML = `<p class="trade-summary-info error">Please enter a valid stake amount.</p>`;
+        confirmBtn.disabled = true;
+        return;
+    }
+
+    const { buy, sell, buyPrice, sellPrice } = pendingTrade;
+
+    const costUSD = buyPrice * size;
+    const revenueUSD = sellPrice * size;
+    const profitUSD = revenueUSD - costUSD;
+    const profitPct = ((sellPrice - buyPrice) / buyPrice) * 100;
+
+    // Liquidity Checks
+    const hasEnoughUSD = wallets[buy].USD >= costUSD;
+    const hasEnoughBTC = wallets[sell].BTC >= size;
+    const liquidityCheckPassed = hasEnoughUSD && hasEnoughBTC;
+    
+    let liquidityMessage = '';
+    if (!hasEnoughUSD) {
+        liquidityMessage += `<p class="trade-summary-info error">Insufficient USD on ${buy}. Required: $${costUSD.toFixed(2)} | Available: $${wallets[buy].USD.toFixed(2)}</p>`;
+    }
+    if (!hasEnoughBTC) {
+        liquidityMessage += `<p class="trade-summary-info error">Insufficient BTC on ${sell}. Required: ${size.toFixed(4)} BTC | Available: ${wallets[sell].BTC.toFixed(4)} BTC</p>`;
+    }
+
+
+    summaryDiv.innerHTML = `
+        <div class="trade-summary-info">Cost to Buy ${size.toFixed(4)} BTC on ${buy}: <strong>$${costUSD.toFixed(2)}</strong> (from ${buy} USD wallet)</div>
+        <div class="trade-summary-info">Revenue from Selling ${size.toFixed(4)} BTC on ${sell}: <strong>$${revenueUSD.toFixed(2)}</strong> (to ${sell} USD wallet)</div>
+        <div class="trade-summary-info" style="color:${profitUSD >= 0 ? 'var(--green)' : 'var(--red)'};">
+            Net Profit: <strong>${profitUSD >= 0 ? '+' : ''}$${profitUSD.toFixed(2)}</strong> (${profitPct.toFixed(2)}%)
+        </div>
+        ${liquidityMessage}
+    `;
+
+    confirmBtn.disabled = !liquidityCheckPassed;
+}
+
+function confirmTrade() {
+    const stakeInput = document.getElementById('tradeStakeInput');
+    const size = parseFloat(stakeInput.value);
+
+    if (isNaN(size) || size <= 0) {
+        console.error("Invalid stake amount.");
+        return;
+    }
+
+    executeTrade(pendingTrade.buy, pendingTrade.sell, size);
+    
+    hideTradeExecutionModal();
+}
+
+
+// --- Success Notification Modal Functions ---
+function hideTradeNotification() {
+    hideModal('tradeNotificationModal');
+}
+
+function showTradeNotification(tradeDetails) {
+    const modalOverlay = document.getElementById('tradeNotificationModal');
+    const modal = document.querySelector('#tradeNotificationModal .modal-content');
+    
+    const totalUSD = EXCHANGES.reduce((sum, ex) => sum + wallets[ex].USD, 0);
+    const profitColor = tradeDetails.profit >= 0 ? 'var(--green)' : 'var(--red)';
+    const confirmationText = accountMode === 'Demo' 
+        ? 'Your demo account has been updated!' 
+        : 'Your live account balances have been updated!';
+
+    document.getElementById('modalBuyPrice').textContent = `$${tradeDetails.buyPrice.toFixed(2)} (${tradeDetails.buy})`;
+    document.getElementById('modalSellPrice').textContent = `$${tradeDetails.sellPrice.toFixed(2)} (${tradeDetails.sell})`;
+    document.getElementById('modalAmount').textContent = `${tradeDetails.size.toFixed(4)} BTC`;
+    
+    document.getElementById('modalProfit').textContent = `${tradeDetails.profit >= 0 ? '+' : ''}$${tradeDetails.profit.toFixed(2)}`;
+    document.getElementById('modalProfit').style.color = profitColor;
+    
+    document.getElementById('modalTotalBalance').textContent = `$${totalUSD.toFixed(2)}`;
+    document.getElementById('modalConfirmationText').textContent = confirmationText;
+    
+    showModal('tradeNotificationModal');
+    // Auto-hide after 5 seconds
+    setTimeout(hideTradeNotification, 5000);
+}
+
+
+// --- Navigation and Mode Functions ---
+function toggleMenu(){
+  const menu = document.getElementById("menu");
+  const overlay = document.querySelector(".menu-overlay");
+  menu.classList.toggle("open");
+  overlay.style.display = menu.classList.contains("open") ? "block" : "none";
+}
+
+function showView(viewId, element) {
+    if (currentView === viewId) return;
+
+    document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    currentView = viewId;
+
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    if (element) {
+        element.classList.add('active');
+    }
+    
+    render();
+}
+
+function toggleMode(newMode) {
+    if (accountMode === newMode) return;
+    accountMode = newMode;
+    trades = []; 
+
+    // Re-initialize all prices and wallets
+    initPrices();
+    initWallets(accountMode);
+
+    document.getElementById('modeDemo').classList.remove('active');
+    document.getElementById('modeLive').classList.remove('active');
+    document.getElementById(`mode${newMode}`).classList.add('active');
+
+    render();
+}
+
+// NEW: Theme Toggle Function
+function toggleTheme(newTheme) {
+    if (currentTheme === newTheme) return;
+    currentTheme = newTheme;
+
+    document.documentElement.setAttribute('data-theme', newTheme);
+    document.getElementById('currentThemeDisplay').textContent = newTheme.charAt(0).toUpperCase() + newTheme.slice(1);
+    
+    // Simple way to visually update the buttons without full render
+    const darkBtn = document.getElementById('themeDarkBtn');
+    const lightBtn = document.getElementById('themeLightBtn');
+    
+    if (newTheme === 'dark') {
+        darkBtn.style.border = '1px solid white';
+        lightBtn.style.border = 'none';
+    } else {
+        darkBtn.style.border = 'none';
+        lightBtn.style.border = '1px solid #1f2937';
+    }
+    
+    // Rerender dashboard elements (like Activity Log background) to refresh theme colors
+    render(); 
+}
+
+
+// --- Rendering Functions ---
+function updateHeaderBalance() {
+    let totalUSD = 0;
+    let totalBTC = 0;
+
+    EXCHANGES.forEach(ex => {
+        totalUSD += wallets[ex].USD;
+        totalBTC += wallets[ex].BTC;
+    });
+
+    const balanceElement = document.getElementById('headerBalance');
+    balanceElement.innerHTML = `
+        <span class="usd-value">$${totalUSD.toFixed(2)}</span>
+        <span class="btc-value">${totalBTC.toFixed(4)} BTC</span>
+    `;
+}
+
+function updateHeaderStats() {
+    const headerMode = document.getElementById('headerMode');
+    headerMode.textContent = accountMode;
+    headerMode.style.background = accountMode === 'Demo' ? 'var(--green)' : 'var(--blue)';
+}
+
+// NEW: Account Summary Rendering
+function renderAccountSummary() {
+    const summaryContainer = document.getElementById('accountSummaryContainer');
+    if (!summaryContainer) return;
+    
+    const profitSignUSD = arbitrageStats.totalProfitUSD >= 0 ? '+' : '';
+    const profitSignBTC = arbitrageStats.totalProfitBTC >= 0 ? '+' : '';
+
+    summaryContainer.innerHTML = `
+        <div class="summary-stat summary-stat-blue">
+            <h4>Deposit</h4>
+            <strong>$${arbitrageStats.totalDepositsUSD.toFixed(2)}</strong>
+        </div>
+        <div class="summary-stat summary-stat-orange">
+            <h4>Withdraw</h4>
+            <strong>$${arbitrageStats.totalWithdrawalsUSD.toFixed(2)}</strong>
+        </div>
+        <div class="summary-stat summary-stat-green">
+            <h4>Profit (USD)</h4>
+            <strong>${profitSignUSD}$${arbitrageStats.totalProfitUSD.toFixed(2)}</strong>
+        </div>
+        <div class="summary-stat summary-stat-purple">
+            <h4>Profit (BTC)</h4>
+            <strong>${profitSignBTC}${arbitrageStats.totalProfitBTC.toFixed(4)} BTC</strong>
+        </div>
+    `;
+}
+
+
+// Quick Stats rendering
+function renderQuickStats() {
+    const statsContainer = document.getElementById('quickStatsContainer');
+    if (!statsContainer) return;
+
+    const currentPortfolioValue = calculateTotalPortfolioValue(wallets);
+    const sessionPnLUSD = currentPortfolioValue - initialTotalValueUSD;
+    const pnlColor = sessionPnLUSD >= 0 ? 'var(--green)' : 'var(--red)';
+    const pnlSign = sessionPnLUSD >= 0 ? '+' : '';
+    
+    const profitCount = trades.filter(t => t.profit > 0).length;
+    const totalTrades = trades.length;
+
+    statsContainer.innerHTML = `
+        <div class="stat" style="background:linear-gradient(135deg,#2563eb,#3b82f6)">
+            Portfolio Value<br>
+            <strong>$${currentPortfolioValue.toFixed(2)}</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg, ${pnlColor} 50%, ${pnlColor}99)">
+            Session PnL<br>
+            <strong style="color: ${pnlColor}">${pnlSign}$${sessionPnLUSD.toFixed(2)}</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,#f97316,#fb923c)">
+            Successful Trades<br>
+            <strong>${profitCount}/${totalTrades}</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,#a855f7,#c084fc)">
+            Total Trades<br>
+            <strong>${totalTrades}</strong>
+        </div>
+    `;
+}
+
+// Arbitrage Performance rendering
+function renderArbitragePerformance() {
+    const statsContainer = document.getElementById('arbitragePerformanceContainer');
+    if (!statsContainer) return;
+    
+    // Calculate needed values
+    const totalTrades = trades.length;
+    const avgPrice = Object.values(prices).reduce((a, b) => a + b, 0) / EXCHANGES.length;
+    const avgProfit = totalTrades > 0 ? arbitrageStats.totalProfitUSD / totalTrades : 0;
+    
+    const avgProfitColor = avgProfit >= 0 ? 'var(--green)' : 'var(--red)';
+    const avgProfitSign = avgProfit >= 0 ? '+' : '';
+    
+    statsContainer.innerHTML = `
+        <div class="stat" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6)">
+            Current Price (Avg)<br>
+            <strong>$${avgPrice.toFixed(2)}</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">
+            Max Spread (%)<br>
+            <strong>${arbitrageStats.maxSpreadPct.toFixed(2)}%</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,#065f46,#10b981)">
+            Avg. Profit (USD)<br>
+            <strong style="color: ${avgProfitColor}">${avgProfitSign}$${Math.abs(avgProfit).toFixed(2)}</strong>
+        </div>
+        <div class="stat" style="background:linear-gradient(135deg,#0e7490,#22d3ee)">
+            Trades Executed<br>
+            <strong>${totalTrades}</strong>
+        </div>
+    `;
+}
+
+
+function getPriceColorClass(exchange, price) {
+    const prevPrice = previousPrices[exchange];
+    if (price > prevPrice) {
+        return 'price-up';
+    } else if (price < prevPrice) {
+        return 'price-down';
+    }
+    return ''; // No change
+}
+
+function renderPriceTable() {
+    const p = document.querySelector("#priceTable tbody");
+    if (!p) return; 
+    p.innerHTML = "";
+    
+    EXCHANGES.forEach(ex => {
+        const price = prices[ex];
+        const colorClass = getPriceColorClass(ex, price);
+        p.innerHTML += `<tr>
+            <td>${ex}</td>
+            <td class="price-cell ${colorClass}">
+                $${price.toFixed(2)}
+            </td>
+        </tr>`;
+    });
+}
+
+function renderWalletTable() {
+    const w = document.querySelector("#walletTable tbody");
+    if (!w) return; 
+    w.innerHTML = "";
+    
+    EXCHANGES.forEach(ex => {
+        const usdUpdate = walletUpdates[ex].USD;
+        const btcUpdate = walletUpdates[ex].BTC;
+
+        // Determine flash classes
+        const usdFlashClass = usdUpdate > 0 ? 'usd-flash-up' : (usdUpdate < 0 ? 'usd-flash-down' : '');
+        const btcFlashClass = btcUpdate > 0 ? 'btc-flash-up' : (btcUpdate < 0 ? 'btc-flash-down' : '');
+
+        w.innerHTML += `<tr>
+            <td>${ex}</td>
+            <td class="wallet-cell ${usdFlashClass}">${wallets[ex].USD.toFixed(2)}</td>
+            <td class="wallet-cell ${btcFlashClass}">${wallets[ex].BTC.toFixed(4)}</td>
+        </tr>`;
+        
+        // Clear flash status immediately after rendering
+        walletUpdates[ex] = { USD: 0, BTC: 0 };
+    });
+}
+
+function renderOpportunityTable() {
+    const o = document.querySelector("#oppTable tbody");
+    if (!o) return; 
+    o.innerHTML = "";
+    const minProfitInput = document.getElementById("minProfit");
+    const minPct = parseFloat(minProfitInput ? minProfitInput.value : 0.2);
+
+    EXCHANGES.forEach(b => {
+        EXCHANGES.forEach(s => {
+            if (b === s) return;
+            const pct = ((prices[s] - prices[b]) / prices[b]) * 100;
+            if (pct >= minPct) {
+                o.innerHTML += `<tr>
+                    <td>${b}</td>
+                    <td>${s}</td>
+                    <td style="color:var(--green)">${pct.toFixed(2)}%</td>
+                    <td><button onclick="openTradeExecutionModal('${b}','${s}')">Trade</button></td>
+                </tr>`;
+            }
+        });
+    });
+}
+
+function renderTradeTable() {
+    const t = document.querySelector("#tradeTable tbody");
+    if (!t) return; 
+    t.innerHTML = "";
+    trades.slice(0, 10).forEach(tr => {
+        const profitColor = tr.profit >= 0 ? 'var(--green)' : 'var(--red)';
+        t.innerHTML += `<tr>
+            <td>${tr.time}</td>
+            <td>${tr.buy}</td>
+            <td>${tr.sell}</td>
+            <td style="color:${profitColor}">${tr.profit.toFixed(2)} USD</td>
+        </tr>`;
+    });
+}
+
+// Activity Log rendering
+function renderActivityLog() {
+    const logDiv = document.getElementById('activityLog');
+    if (!logDiv) return;
+
+    logDiv.innerHTML = activityLog.map(log => {
+        let typeClass = '';
+        if (log.type === 'trade') typeClass = 'log-trade';
+        else if (log.type === 'opportunity') typeClass = 'log-opportunity';
+        else typeClass = 'log-system';
+
+        return `<div class="log-entry ${typeClass}">
+            <span class="log-time">[${log.time}]</span>
+            <span>${log.message}</span>
+        </div>`;
+    }).join('');
+
+    // Scroll to top to show latest message
+    logDiv.scrollTop = 0;
+}
+
+// Initial theme setup on load
+function initialThemeSetup() {
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    currentTheme = theme;
+    
+    // Set up the initial button look
+    toggleTheme(theme);
+}
+
+
+function render() {
+    updateHeaderStats();
+    updateHeaderBalance(); 
+    
+    // Always render summary, quick stats, arbitrage performance, and log for dashboard-like feel
+    renderAccountSummary(); // NEW CALL
+    renderQuickStats();
+    renderArbitragePerformance();
+    renderActivityLog();
+    
+    if (currentView === 'dashboard') {
+        renderPriceTable();
+        renderWalletTable();
+    } else if (currentView === 'opportunities') {
+        renderOpportunityTable();
+    } else if (currentView === 'runningTrades') {
+        renderTradeTable();
+    }
+
+    // Update latency display on every render cycle
+    updateLatencyIndicator();
+}
+
+// --- Trade Logic ---
+function executeTrade(buy, sell, size) {
+    const cost = prices[buy] * size;
+    const revenue = prices[sell] * size;
+    const profit = revenue - cost;
+
+    if (wallets[buy].USD < cost || wallets[sell].BTC < size) {
+        console.error("Trade failed: Insufficient funds after final check.");
+        logActivity('Trade failed due to insufficient liquidity.', 'system');
+        return;
+    }
+    
+    // Update arbitrage stats
+    arbitrageStats.totalProfitUSD += profit;
+    // Calculate equivalent BTC profit (using average price)
+    const avgPrice = Object.values(prices).reduce((a, b) => a + b, 0) / EXCHANGES.length;
+    const profitBTC = profit / avgPrice;
+    arbitrageStats.totalProfitBTC += profitBTC;
+    
+    // Save old balances for color-coding comparison
+    const oldBuyUSD = wallets[buy].USD;
+    const oldBuyBTC = wallets[buy].BTC;
+    const oldSellUSD = wallets[sell].USD;
+    const oldSellBTC = wallets[sell].BTC;
+
+    // Execute trade simulation
+    wallets[buy].USD -= cost;
+    wallets[buy].BTC += size;
+    wallets[sell].BTC -= size;
+    wallets[sell].USD += revenue;
+
+    // Record wallet changes for rendering pulse effect: 1=up, -1=down, 0=none
+    walletUpdates[buy].USD = wallets[buy].USD < oldBuyUSD ? -1 : 1; 
+    walletUpdates[buy].BTC = wallets[buy].BTC > oldBuyBTC ? 1 : -1; 
+    walletUpdates[sell].BTC = wallets[sell].BTC < oldSellBTC ? -1 : 1; 
+    walletUpdates[sell].USD = wallets[sell].USD > oldSellUSD ? 1 : -1; 
+    
+    // Record trade
+    trades.unshift({
+        time: new Date().toLocaleTimeString(),
+        buy,
+        sell,
+        profit,
+        size: size,
+        mode: accountMode
+    });
+
+    render();
+    
+    // Log trade activity
+    logActivity(`Trade successful: ${size.toFixed(4)} BTC. PnL: +$${profit.toFixed(2)}`, 'trade');
+    
+    showTradeNotification({
+        buyPrice: prices[buy],
+        sellPrice: prices[sell],
+        buy: buy,
+        sell: sell,
+        size: size,
+        profit: profit
+    });
+}
+
+// --- Dynamic Price Update Loop ---
+function updatePricesAndRender() {
+    // 1. Save current prices as previous prices
+    previousPrices = JSON.parse(JSON.stringify(prices));
+
+    // 2. Calculate new prices (Random Walk)
+    EXCHANGES.forEach(ex => {
+        // More subtle price change
+        prices[ex] += Math.random() * 80 - 40; 
+        if (prices[ex] < 50000) prices[ex] = 50000;
+    });
+
+    // 3. Check for new opportunities and log them (and track max spread)
+    const minPct = 0.2; 
+    let opportunitiesFound = 0;
+    let currentMaxSpread = 0; // Track max spread in this cycle
+    
+    EXCHANGES.forEach(b => {
+        EXCHANGES.forEach(s => {
+            if (b === s) return;
+            const pct = ((prices[s] - prices[b]) / prices[b]) * 100;
+
+            // Track max spread for display
+            if (pct > currentMaxSpread) {
+                currentMaxSpread = pct;
+            }
+            
+            if (pct >= minPct) {
+                logActivity(`Opportunity: ${b} -> ${s} @ ${pct.toFixed(2)}%`, 'opportunity');
+                opportunitiesFound++;
+            }
+        });
+    });
+    
+    // Update historical max spread
+    if (currentMaxSpread > arbitrageStats.maxSpreadPct) {
+        arbitrageStats.maxSpreadPct = currentMaxSpread;
+    }
+
+    if (opportunitiesFound === 0) {
+        logActivity('Data stream received. No actionable opportunities found.', 'system');
+    }
+
+    // 4. Render
+    render();
+}
+
+// --- Latency Indicator Logic ---
+let currentLatency = 50;
+
+function updateLatencyIndicator() {
+    // Simulate real-time latency fluctuation
+    const fluctuation = Math.floor(Math.random() * 20) - 10; // +/- 10 ms
+    currentLatency = Math.min(150, Math.max(20, currentLatency + fluctuation)); 
+
+    const dot = document.getElementById('latencyDot');
+    const text = document.getElementById('latencyText');
+
+    let dotColor = 'var(--green)';
+    let statusText = `${currentLatency} ms`;
+    
+    if (currentLatency > 80 && currentLatency <= 120) {
+        dotColor = 'var(--yellow)';
+    } else if (currentLatency > 120) {
+        dotColor = 'var(--red)';
+        statusText = 'High Latency';
+    } else {
+        dotColor = 'var(--green)';
+    }
+
+    dot.style.background = dotColor;
+    text.textContent = statusText;
+}
+
+
+// --- Main Execution ---
+initPrices();
+initWallets('Demo'); 
+initialThemeSetup(); // Run initial theme setup
+// Price updates and opportunity checks every 1.5 seconds
+setInterval(updatePricesAndRender, 1500); 
+// Latency update every 1 second
+setInterval(updateLatencyIndicator, 1000); 
+
+render();
+</script>
+</body>
+</html>

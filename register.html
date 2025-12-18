@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite Exchange – Register</title>
+<!-- Tailwind CSS CDN for utility classes and aesthetics -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* --- DARK MODE VARIABLES (DEFAULT) --- */
+:root[data-theme="dark"]{
+  --bg:#020617;
+  --card:#0f172a;
+  --card2:#111827;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --blue:#3b82f6;
+  --green:#22c55e;
+  --red:#ef4444;
+}
+
+/* --- LIGHT MODE VARIABLES --- */
+:root[data-theme="light"]{
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --card2:#f1f5f9;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --blue:#2563eb;
+  --green:#16a34a;
+  --red:#dc2626;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Inter', sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.auth-container{
+  max-width:430px;
+  width:95%;
+  margin:auto;
+  padding:20px;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  font-weight:800;
+  font-size:24px;
+  margin-bottom:20px;
+}
+
+.logo-icon{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--blue),var(--green));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  color:white;
+}
+
+.card{
+  background:var(--card);
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+
+/* Light mode adjustments for card shadow */
+:root[data-theme="light"] .card {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.form-group{
+  margin-bottom:15px;
+}
+
+.form-group label{
+  display:block;
+  margin-bottom:5px;
+  font-size:14px;
+  font-weight:600;
+}
+
+input:not([type="checkbox"]), select, button[type="submit"]{
+  width:100%;
+  padding:12px 15px;
+  border-radius:10px;
+  font-size:16px;
+  transition:border-color 0.2s;
+}
+
+input:not([type="checkbox"]), select{
+  background:var(--bg);
+  border:1px solid #334155;
+  color:var(--text);
+}
+:root[data-theme="light"] input:not([type="checkbox"]), :root[data-theme="light"] select{
+    background:#ffffff;
+    border:1px solid #cbd5e1;
+}
+
+input:focus, select:focus{
+  outline:none;
+  border-color:var(--blue);
+}
+
+button[type="submit"]{
+  background:linear-gradient(90deg,var(--blue),#3b82f6);
+  color:white;
+  font-weight:700;
+  margin-top:20px;
+  cursor:pointer;
+  transition:opacity 0.2s;
+}
+
+button[type="submit"]:hover{
+  opacity:0.9;
+}
+
+.phone-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.phone-input-group select {
+    flex: 0 0 100px;
+}
+
+.phone-input-group input {
+    flex-grow: 1;
+}
+
+/* Message Box Styles */
+.message-box {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: 600;
+    display: none; /* Hidden by default */
+}
+
+.message-box.success {
+    background: #064e3b; /* Dark Green */
+    color: var(--green);
+    border: 1px solid var(--green);
+}
+.message-box.error {
+    background: #7f1d1d; /* Dark Red */
+    color: var(--red);
+    border: 1px solid var(--red);
+}
+
+/* Theme Switch Button Styling (Minimized) */
+.theme-switch-btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    border-radius: 8px;
+    background: var(--card2) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--muted);
+    cursor: pointer;
+}
+.theme-switch-btn.active-theme {
+    background: var(--blue) !important;
+    color: white !important;
+    border-color: var(--blue) !important;
+}
+
+.footer-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+}
+.footer-link a {
+    color: var(--blue);
+    font-weight: 600;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body data-theme="dark">
+
+<div class="auth-container">
+    <div class="logo">
+        <div class="logo-icon">E</div>
+        Elite Exchange
+    </div>
+
+    <div class="card">
+        
+        <div class="flex justify-end mb-4">
+            <span class="text-sm font-semibold mr-2 text-gray-400">Theme:</span>
+            <button id="themeDarkBtn" class="theme-switch-btn active-theme" onclick="toggleTheme('dark')">Dark</button>
+            <button id="themeLightBtn" class="theme-switch-btn ml-2" onclick="toggleTheme('light')">Light</button>
+        </div>
+
+        <h2 class="text-2xl font-bold mb-4 text-center">Create Elite Account</h2>
+
+        <!-- Feedback Message Box -->
+        <div id="authMessage" class="message-box"></div>
+
+        <!-- REGISTRATION FORM -->
+        <form id="registerForm" onsubmit="handleRegistration(event)">
+            <div class="form-group">
+                <label for="registerFullname">Full Name</label>
+                <input type="text" id="registerFullname" required placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="registerUsername">Username</label>
+                <input type="text" id="registerUsername" required placeholder="elite_trader_1">
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">Email Address</label>
+                <input type="email" id="registerEmail" required placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label for="registerCountry">Country</label>
+                <select id="registerCountry" required>
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="registerCurrency">Primary Trading Currency</label>
+                <select id="registerCurrency" required>
+                     <!-- Options populated by JS -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="registerPhone">Phone Number</label>
+                <div class="phone-input-group">
+                    <select id="registerCountryCode" required>
+                        <!-- Options populated by JS -->
+                    </select>
+                    <input type="tel" id="registerPhone" required placeholder="123 456 7890">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password</label>
+                <input type="password" id="registerPassword" required placeholder="Must be 6+ characters">
+            </div>
+            <div class="form-group">
+                <label for="registerConfirmPassword">Confirm Password</label>
+                <input type="password" id="registerConfirmPassword" required placeholder="Retype password">
+            </div>
+            <button type="submit" id="registerSubmitBtn">Register Account</button>
+        </form>
+
+        <p class="footer-link">
+            Already have an account? 
+            <a href="login.html">Login Here</a>
+        </p>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app-check.js";
+
+// Global Firebase setup variables
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+let db, auth;
+
+// Data for Select Inputs
+const countryData = [
+    { name: "United States", code: "+1", flag: "🇺🇸", currency: "USD" },
+    { name: "United Kingdom", code: "+44", flag: "🇬🇧", currency: "GBP" },
+    { name: "Canada", code: "+1", flag: "🇨🇦", currency: "CAD" },
+    { name: "Australia", code: "+61", flag: "🇦🇺", currency: "AUD" },
+    { name: "Germany", code: "+49", flag: "🇩🇪", currency: "EUR" },
+    { name: "Japan", code: "+81", flag: "🇯🇵", currency: "JPY" },
+    { name: "India", code: "+91", flag: "🇮🇳", currency: "INR" },
+    { name: "Brazil", code: "+55", flag: "🇧🇷", currency: "BRL" },
+    { name: "Nigeria", code: "+234", flag: "🇳🇬", currency: "NGN" },
+    { name: "South Africa", code: "+27", flag: "🇿🇦", currency: "ZAR" },
+    { name: "Mexico", code: "+52", flag: "🇲🇽", currency: "MXN" },
+    { name: "China", code: "+86", flag: "🇨🇳", currency: "CNY" },
+];
+
+const currencies = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "INR", "BRL", "NGN", "ZAR", "MXN", "CNY", "BTC", "ETH", "USDT"];
+
+
+// --- Initialization ---
+
+function initFirebase() {
+    try {
+        if (Object.keys(firebaseConfig).length === 0) {
+            console.error("Firebase config is missing or empty.");
+            displayMessage('error', 'Firebase configuration error.');
+            return;
+        }
+        
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        // setLogLevel('Debug');
+        setPersistence(auth, browserLocalPersistence);
+
+        console.log("Firebase services initialized.");
+        
+    } catch (e) {
+        console.error("Error initializing Firebase:", e);
+        displayMessage('error', 'Failed to initialize application services.');
+    }
+}
+
+// Helper to display messages without using alert()
+function displayMessage(type, message) {
+    const msgBox = document.getElementById('authMessage');
+    msgBox.textContent = message;
+    msgBox.className = `message-box ${type}`;
+    msgBox.style.display = 'block';
+    
+    if (type !== 'error') {
+        setTimeout(() => {
+            msgBox.style.display = 'none';
+        }, 5000);
+    }
+}
+
+function populateSelects() {
+    const countrySelect = document.getElementById('registerCountry');
+    const codeSelect = document.getElementById('registerCountryCode');
+    const currencySelect = document.getElementById('registerCurrency');
+
+    countryData.forEach(c => {
+        // Country Select
+        const optionC = document.createElement('option');
+        optionC.value = c.name;
+        optionC.textContent = `${c.flag} ${c.name}`;
+        countrySelect.appendChild(optionC);
+
+        // Country Code Select
+        const optionCode = document.createElement('option');
+        optionCode.value = c.code;
+        optionCode.textContent = `${c.flag} ${c.code}`;
+        codeSelect.appendChild(optionCode);
+    });
+
+    currencies.forEach(curr => {
+        const optionCurr = document.createElement('option');
+        optionCurr.value = curr;
+        optionCurr.textContent = curr;
+        if (curr === 'USD') { // Set USD as default
+            optionCurr.selected = true;
+        }
+        currencySelect.appendChild(optionCurr);
+    });
+}
+
+window.toggleTheme = function(theme) {
+    document.body.setAttribute('data-theme', theme);
+    const darkBtn = document.getElementById('themeDarkBtn');
+    const lightBtn = document.getElementById('themeLightBtn');
+
+    darkBtn.classList.toggle('active-theme', theme === 'dark');
+    lightBtn.classList.toggle('active-theme', theme === 'light');
+}
+
+
+// --- Authentication Logic ---
+
+window.handleRegistration = async function(e) {
+    e.preventDefault();
+    displayMessage('success', 'Processing registration...');
+    document.getElementById('registerSubmitBtn').disabled = true;
+
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+    const fullName = document.getElementById('registerFullname').value;
+    const username = document.getElementById('registerUsername').value;
+    const country = document.getElementById('registerCountry').value;
+    const currency = document.getElementById('registerCurrency').value;
+    const phoneCode = document.getElementById('registerCountryCode').value;
+    const phoneNumber = document.getElementById('registerPhone').value;
+
+    if (password !== confirmPassword) {
+        displayMessage('error', 'Error: Passwords do not match.');
+        document.getElementById('registerSubmitBtn').disabled = false;
+        return;
+    }
+    
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // 2. Save additional user data to Firestore
+        const userProfile = {
+            fullName: fullName,
+            username: username,
+            country: country,
+            currency: currency,
+            phone: phoneCode + phoneNumber,
+            createdAt: new Date().toISOString(),
+            // Store data in the private user collection path
+        };
+        
+        const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'user_profile', 'data');
+        await setDoc(userDocRef, userProfile);
+        
+        // 3. Success Feedback
+        displayMessage('success', `Registration successful for user ${username}! Redirecting to login...`);
+        document.getElementById('registerForm').reset();
+        
+        // In a real app, you would redirect the user here: window.location.href = 'login.html';
+        setTimeout(() => {
+            displayMessage('success', `Account created! Please proceed to login. (No actual redirect in Canvas)`);
+            document.getElementById('registerSubmitBtn').disabled = false;
+        }, 2000);
+
+    } catch (error) {
+        const errorMessage = error.message.replace('Firebase: Error (auth/', '').replace(').', '');
+        console.error("Registration error:", error);
+        displayMessage('error', `Registration Failed: ${errorMessage}`);
+        document.getElementById('registerSubmitBtn').disabled = false;
+    }
+}
+
+// --- Main Execution ---
+document.addEventListener('DOMContentLoaded', () => {
+    initFirebase();
+    populateSelects();
+});
+</script>
+

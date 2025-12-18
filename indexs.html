@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for input focus and mobile layout */
+        input:focus, select:focus {
+            --tw-ring-color: #4f46e5; /* indigo-600 */
+        }
+        .form-container {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .country-select-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .country-flag {
+            font-size: 1.25rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5', // Indigo 600
+                        'primary-dark': '#3730a3', // Indigo 700
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+
+    <div id="app-container" class="w-full max-w-lg">
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                Welcome Back
+            </h1>
+            <p class="mt-2 text-sm text-gray-500">
+                Sign in or register to access your dashboard.
+            </p>
+        </header>
+
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100">
+
+            <div id="auth-status" class="mb-6 p-4 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-sm hidden">
+                <p id="status-text" class="font-medium"></p>
+                <p id="user-info" class="text-xs mt-1 break-all"></p>
+            </div>
+
+            <div id="message-box" class="mb-4 p-3 rounded-lg text-sm transition duration-300 ease-in-out opacity-0 hidden"></div>
+
+            <div id="loading-indicator" class="flex justify-center py-6 hidden">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-primary font-medium">Processing...</span>
+            </div>
+
+
+            <form id="login-form" class="form-container">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Sign In</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                        <input type="email" id="login-email" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none">
+                    </div>
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="login-password" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition duration-150 ease-in-out">
+                        Login
+                    </button>
+                </div>
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Don't have an account?
+                    <button type="button" onclick="toggleForm('register')" class="text-primary hover:text-primary-dark font-medium underline transition duration-150">
+                        Register now
+                    </button>
+                </p>
+            </form>
+
+            <form id="register-form" class="form-container hidden">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Create Account</h2>
+                <div class="space-y-4">
+
+                    <div>
+                        <label for="reg-full-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="reg-full-name" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none">
+                    </div>
+
+                    <div>
+                        <label for="reg-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="reg-username" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none">
+                    </div>
+
+                    <div>
+                        <label for="reg-email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                        <input type="email" id="reg-email" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-country" class="block text-sm font-medium text-gray-700 mb-1">Country & Flag</label>
+                            <select id="reg-country" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none appearance-none bg-white">
+                                </select>
+                        </div>
+                        <div>
+                            <label for="reg-currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                            <select id="reg-currency" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none appearance-none bg-white">
+                                </select>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <div class="flex-shrink-0 w-1/4">
+                            <label for="reg-phone-code" class="block text-sm font-medium text-gray-700 mb-1">Code</label>
+                            <input type="text" id="reg-phone-code" readonly value="+1" class="w-full p-3 border border-gray-300 bg-gray-100 text-gray-600 rounded-lg shadow-sm outline-none">
+                        </div>
+                        <div class="flex-grow">
+                            <label for="reg-phone-number" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                            <input type="tel" id="reg-phone-number" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none" pattern="[0-9]{7,15}" title="Phone number must be between 7 and 15 digits.">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="reg-password" required minlength="6" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none">
+                    </div>
+
+                    <div>
+                        <label for="reg-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input type="password" id="reg-confirm-password" required minlength="6" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary outline-none">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary-dark transition duration-150 ease-in-out">
+                        Register
+                    </button>
+                </div>
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Already have an account?
+                    <button type="button" onclick="toggleForm('login')" class="text-primary hover:text-primary-dark font-medium underline transition duration-150">
+                        Sign In
+                    </button>
+                </p>
+            </form>
+
+            <button id="sign-out-btn" class="w-full py-2 mt-6 px-4 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-150 ease-in-out hidden" onclick="handleSignOut()">
+                Sign Out
+            </button>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signInWithCustomToken,
+            signInAnonymously,
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- GLOBAL VARIABLES (Provided by Canvas Environment) ---
+        // NOTE: These variables are placeholder declarations. In a real environment, they must be defined globally before this script runs.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: appId,
+        }; // Fallback for testing
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let auth;
+        let db;
+
+        // --- DOM ELEMENTS ---
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const messageBox = document.getElementById('message-box');
+        const authStatus = document.getElementById('auth-status');
+        const statusText = document.getElementById('status-text');
+        const userInfo = document.getElementById('user-info');
+        const signOutBtn = document.getElementById('sign-out-btn');
+
+        const regCountrySelect = document.getElementById('reg-country');
+        const regCurrencySelect = document.getElementById('reg-currency');
+        const regPhoneCodeInput = document.getElementById('reg-phone-code');
+        const regPhoneNumberInput = document.getElementById('reg-phone-number');
+
+        // --- FULL COUNTRY AND CURRENCY DATA (REPLACED WITH COMPREHENSIVE LIST) ---
+        const COUNTRY_DATA = [
+            { code: 'AF', name: 'Afghanistan', flag: '🇦🇫', phone: '+93', currency: 'AFN' },
+            { code: 'AL', name: 'Albania', flag: '🇦🇱', phone: '+355', currency: 'ALL' },
+            { code: 'DZ', name: 'Algeria', flag: '🇩🇿', phone: '+213', currency: 'DZD' },
+            { code: 'AS', name: 'American Samoa', flag: '🇦🇸', phone: '+1-684', currency: 'USD' },
+            { code: 'AD', name: 'Andorra', flag: '🇦🇩', phone: '+376', currency: 'EUR' },
+            { code: 'AO', name: 'Angola', flag: '🇦🇴', phone: '+244', currency: 'AOA' },
+            { code: 'AI', name: 'Anguilla', flag: '🇦🇮', phone: '+1-264', currency: 'XCD' },
+            { code: 'AQ', name: 'Antarctica', flag: '🇦🇶', phone: '+672', currency: 'USD' },
+            { code: 'AG', name: 'Antigua and Barbuda', flag: '🇦🇬', phone: '+1-268', currency: 'XCD' },
+            { code: 'AR', name: 'Argentina', flag: '🇦🇷', phone: '+54', currency: 'ARS' },
+            { code: 'AM', name: 'Armenia', flag: '🇦🇲', phone: '+374', currency: 'AMD' },
+            { code: 'AW', name: 'Aruba', flag: '🇦🇼', phone: '+297', currency: 'AWG' },
+            { code: 'AU', name: 'Australia', flag: '🇦🇺', phone: '+61', currency: 'AUD' },
+            { code: 'AT', name: 'Austria', flag: '🇦🇹', phone: '+43', currency: 'EUR' },
+            { code: 'AZ', name: 'Azerbaijan', flag: '🇦🇿', phone: '+994', currency: 'AZN' },
+            { code: 'BS', name: 'Bahamas', flag: '🇧🇸', phone: '+1-242', currency: 'BSD' },
+            { code: 'BH', name: 'Bahrain', flag: '🇧🇭', phone: '+973', currency: 'BHD' },
+            { code: 'BD', name: 'Bangladesh', flag: '🇧🇩', phone: '+880', currency: 'BDT' },
+            { code: 'BB', name: 'Barbados', flag: '🇧🇧', phone: '+1-246', currency: 'BBD' },
+            { code: 'BY', name: 'Belarus', flag: '🇧🇾', phone: '+375', currency: 'BYN' },
+            { code: 'BE', name: 'Belgium', flag: '🇧🇪', phone: '+32', currency: 'EUR' },
+            { code: 'BZ', name: 'Belize', flag: '🇧🇿', phone: '+501', currency: 'BZD' },
+            { code: 'BJ', name: 'Benin', flag: '🇧🇯', phone: '+229', currency: 'XOF' }, 
+            { code: 'BM', name: 'Bermuda', flag: '🇧🇲', phone: '+1-441', currency: 'BMD' },
+            { code: 'BT', name: 'Bhutan', flag: '🇧🇹', phone: '+975', currency: 'BTN' },
+            { code: 'BO', name: 'Bolivia', flag: '🇧🇴', phone: '+591', currency: 'BOB' },
+            { code: 'BA', name: 'Bosnia and Herzegovina', flag: '🇧🇦', phone: '+387', currency: 'BAM' },
+            { code: 'BW', name: 'Botswana', flag: '🇧🇼', phone: '+267', currency: 'BWP' }, 
+            { code: 'BR', name: 'Brazil', flag: '🇧🇷', phone: '+55', currency: 'BRL' },
+            { code: 'IO', name: 'British Indian Ocean Territory', flag: '🇮🇴', phone: '+246', currency: 'USD' },
+            { code: 'VG', name: 'British Virgin Islands', flag: '🇻🇬', phone: '+1-284', currency: 'USD' },
+            { code: 'BN', name: 'Brunei Darussalam', flag: '🇧🇳', phone: '+673', currency: 'BND' },
+            { code: 'BG', name: 'Bulgaria', flag: '🇧🇬', phone: '+359', currency: 'BGN' },
+            { code: 'BF', name: 'Burkina Faso', flag: '🇧🇫', phone: '+226', currency: 'XOF' }, 
+            { code: 'BI', name: 'Burundi', flag: '🇧🇮', phone: '+257', currency: 'BIF' }, 
+            { code: 'CV', name: 'Cabo Verde', flag: '🇨🇻', phone: '+238', currency: 'CVE' }, 
+            { code: 'KH', name: 'Cambodia', flag: '🇰🇭', phone: '+855', currency: 'KHR' },
+            { code: 'CM', name: 'Cameroon', flag: '🇨🇲', phone: '+237', currency: 'XAF' }, 
+            { code: 'CA', name: 'Canada', flag: '🇨🇦', phone: '+1', currency: 'CAD' },
+            { code: 'KY', name: 'Cayman Islands', flag: '🇰🇾', phone: '+1-345', currency: 'KYD' },
+            { code: 'CF', name: 'Central African Republic', flag: '🇨🇫', phone: '+236', currency: 'XAF' }, 
+            { code: 'TD', name: 'Chad', flag: '🇹🇩', phone: '+235', currency: 'XAF' }, 
+            { code: 'CL', name: 'Chile', flag: '🇨🇱', phone: '+56', currency: 'CLP' },
+            { code: 'CN', name: 'China', flag: '🇨🇳', phone: '+86', currency: 'CNY' },
+            { code: 'CX', name: 'Christmas Island', flag: '🇨🇽', phone: '+61', currency: 'AUD' },
+            { code: 'CC', name: 'Cocos (Keeling) Islands', flag: '🇨🇨', phone: '+61', currency: 'AUD' },
+            { code: 'CO', name: 'Colombia', flag: '🇨🇴', phone: '+57', currency: 'COP' },
+            { code: 'KM', name: 'Comoros', flag: '🇰🇲', phone: '+269', currency: 'KMF' }, 
+            { code: 'CD', name: 'Congo, Democratic Republic of the', flag: '🇨🇩', phone: '+243', currency: 'CDF' }, 
+            { code: 'CG', name: 'Congo (Republic of the)', flag: '🇨🇬', phone: '+242', currency: 'XAF' }, 
+            { code: 'CR', name: 'Costa Rica', flag: '🇨🇷', phone: '+506', currency: 'CRC' },
+            { code: 'CI', name: 'Côte d\'Ivoire', flag: '🇨🇮', phone: '+225', currency: 'XOF' }, 
+            { code: 'HR', name: 'Croatia', flag: '🇭🇷', phone: '+385', currency: 'EUR' },
+            { code: 'CU', name: 'Cuba', flag: '🇨🇺', phone: '+53', currency: 'CUP' },
+            { code: 'CW', name: 'Curaçao', flag: '🇨🇼', phone: '+599', currency: 'ANG' },
+            { code: 'CY', name: 'Cyprus', flag: '🇨🇾', phone: '+357', currency: 'EUR' },
+            { code: 'CZ', name: 'Czechia', flag: '🇨🇿', phone: '+420', currency: 'CZK' },
+            { code: 'DK', name: 'Denmark', flag: '🇩🇰', phone: '+45', currency: 'DKK' },
+            { code: 'DJ', name: 'Djibouti', flag: '🇩🇯', phone: '+253', currency: 'DJF' }, 
+            { code: 'DM', name: 'Dominica', flag: '🇩🇲', phone: '+1-767', currency: 'XCD' },
+            { code: 'DO', name: 'Dominican Republic', flag: '🇩🇴', phone: '+1-809', currency: 'DOP' },
+            { code: 'EC', name: 'Ecuador', flag: '🇪🇨', phone: '+593', currency: 'USD' },
+            { code: 'EG', name: 'Egypt', flag: '🇪🇬', phone: '+20', currency: 'EGP' }, 
+            { code: 'SV', name: 'El Salvador', flag: '🇸🇻', phone: '+503', currency: 'USD' },
+            { code: 'GQ', name: 'Equatorial Guinea', flag: '🇬🇶', phone: '+240', currency: 'XAF' }, 
+            { code: 'ER', name: 'Eritrea', flag: '🇪🇷', phone: '+291', currency: 'ERN' }, 
+            { code: 'EE', name: 'Estonia', flag: '🇪🇪', phone: '+372', currency: 'EUR' },
+            { code: 'ET', name: 'Ethiopia', flag: '🇪🇹', phone: '+251', currency: 'ETB' }, 
+            { code: 'FK', name: 'Falkland Islands', flag: '🇫🇰', phone: '+500', currency: 'FKP' },
+            { code: 'FO', name: 'Faroe Islands', flag: '🇫🇴', phone: '+298', currency: 'DKK' },
+            { code: 'FJ', name: 'Fiji', flag: '🇫🇯', phone: '+679', currency: 'FJD' },
+            { code: 'FI', name: 'Finland', flag: '🇫🇮', phone: '+358', currency: 'EUR' },
+            { code: 'FR', name: 'France', flag: '🇫🇷', phone: '+33', currency: 'EUR' },
+            { code: 'GF', name: 'French Guiana', flag: '🇬🇫', phone: '+594', currency: 'EUR' },
+            { code: 'PF', name: 'French Polynesia', flag: '🇵🇫', phone: '+689', currency: 'XPF' },
+            { code: 'GA', name: 'Gabon', flag: '🇬🇦', phone: '+241', currency: 'XAF' }, 
+            { code: 'GM', name: 'Gambia', flag: '🇬🇲', phone: '+220', currency: 'GMD' }, 
+            { code: 'GE', name: 'Georgia', flag: '🇬🇪', phone: '+995', currency: 'GEL' },
+            { code: 'DE', name: 'Germany', flag: '🇩🇪', phone: '+49', currency: 'EUR' },
+            { code: 'GH', name: 'Ghana', flag: '🇬🇭', phone: '+233', currency: 'GHS' }, 
+            { code: 'GI', name: 'Gibraltar', flag: '🇬🇮', phone: '+350', currency: 'GIP' },
+            { code: 'GR', name: 'Greece', flag: '🇬🇷', phone: '+30', currency: 'EUR' },
+            { code: 'GL', name: 'Greenland', flag: '🇬🇱', phone: '+299', currency: 'DKK' },
+            { code: 'GD', name: 'Grenada', flag: '🇬🇩', phone: '+1-473', currency: 'XCD' },
+            { code: 'GP', name: 'Guadeloupe', flag: '🇬🇵', phone: '+590', currency: 'EUR' },
+            { code: 'GU', name: 'Guam', flag: '🇬🇺', phone: '+1-671', currency: 'USD' },
+            { code: 'GT', name: 'Guatemala', flag: '🇬🇹', phone: '+502', currency: 'GTQ' },
+            { code: 'GN', name: 'Guinea', flag: '🇬🇳', phone: '+224', currency: 'GNF' }, 
+            { code: 'GW', name: 'Guinea-Bissau', flag: '🇬🇼', phone: '+245', currency: 'XOF' }, 
+            { code: 'GY', name: 'Guyana', flag: '🇬🇾', phone: '+592', currency: 'GYD' },
+            { code: 'HT', name: 'Haiti', flag: '🇭🇹', phone: '+509', currency: 'HTG' },
+            { code: 'VA', name: 'Holy See (Vatican City State)', flag: '🇻🇦', phone: '+39-06', currency: 'EUR' },
+            { code: 'HN', name: 'Honduras', flag: '🇭🇳', phone: '+504', currency: 'HNL' },
+            { code: 'HK', name: 'Hong Kong', flag: '🇭🇰', phone: '+852', currency: 'HKD' },
+            { code: 'HU', name: 'Hungary', flag: '🇭🇺', phone: '+36', currency: 'HUF' },
+            { code: 'IS', name: 'Iceland', flag: '🇮🇸', phone: '+354', currency: 'ISK' },
+            { code: 'IN', name: 'India', flag: '🇮🇳', phone: '+91', currency: 'INR' },
+            { code: 'ID', name: 'Indonesia', flag: '🇮🇩', phone: '+62', currency: 'IDR' },
+            { code: 'IR', name: 'Iran', flag: '🇮🇷', phone: '+98', currency: 'IRR' },
+            { code: 'IQ', name: 'Iraq', flag: '🇮🇶', phone: '+964', currency: 'IQD' },
+            { code: 'IE', name: 'Ireland', flag: '🇮🇪', phone: '+353', currency: 'EUR' },
+            { code: 'IL', name: 'Israel', flag: '🇮🇱', phone: '+972', currency: 'ILS' },
+            { code: 'IT', name: 'Italy', flag: '🇮🇹', phone: '+39', currency: 'EUR' },
+            { code: 'JM', name: 'Jamaica', flag: '🇯🇲', phone: '+1-876', currency: 'JMD' },
+            { code: 'JP', name: 'Japan', flag: '🇯🇵', phone: '+81', currency: 'JPY' },
+            { code: 'JO', name: 'Jordan', flag: '🇯🇴', phone: '+962', currency: 'JOD' },
+            { code: 'KZ', name: 'Kazakhstan', flag: '🇰🇿', phone: '+7', currency: 'KZT' },
+            { code: 'KE', name: 'Kenya', flag: '🇰🇪', phone: '+254', currency: 'KES' }, 
+            { code: 'KI', name: 'Kiribati', flag: '🇰🇮', phone: '+686', currency: 'AUD' },
+            { code: 'KP', name: 'Korea (North)', flag: '🇰🇵', phone: '+850', currency: 'KPW' },
+            { code: 'KR', name: 'Korea (South)', flag: '🇰🇷', phone: '+82', currency: 'KRW' },
+            { code: 'KW', name: 'Kuwait', flag: '🇰🇼', phone: '+965', currency: 'KWD' },
+            { code: 'KG', name: 'Kyrgyzstan', flag: '🇰🇬', phone: '+996', currency: 'KGS' },
+            { code: 'LA', name: 'Lao PDR', flag: '🇱🇦', phone: '+856', currency: 'LAK' },
+            { code: 'LV', name: 'Latvia', flag: '🇱🇻', phone: '+371', currency: 'EUR' },
+            { code: 'LB', name: 'Lebanon', flag: '🇱🇧', phone: '+961', currency: 'LBP' },
+            { code: 'LS', name: 'Lesotho', flag: '🇱🇸', phone: '+266', currency: 'LSL' }, 
+            { code: 'LR', name: 'Liberia', flag: '🇱🇷', phone: '+231', currency: 'LRD' }, 
+            { code: 'LY', name: 'Libya', flag: '🇱🇾', phone: '+218', currency: 'LYD' }, 
+            { code: 'LI', name: 'Liechtenstein', flag: '🇱🇮', phone: '+423', currency: 'CHF' },
+            { code: 'LT', name: 'Lithuania', flag: '🇱🇹', phone: '+370', currency: 'EUR' },
+            { code: 'LU', name: 'Luxembourg', flag: '🇱🇺', phone: '+352', currency: 'EUR' },
+            { code: 'MO', name: 'Macao', flag: '🇲🇴', phone: '+853', currency: 'MOP' },
+            { code: 'MK', name: 'Macedonia, Republic of', flag: '🇲🇰', phone: '+389', currency: 'MKD' },
+            { code: 'MG', name: 'Madagascar', flag: '🇲🇬', phone: '+261', currency: 'MGA' }, 
+            { code: 'MW', name: 'Malawi', flag: '🇲🇼', phone: '+265', currency: 'MWK' }, 
+            { code: 'MY', name: 'Malaysia', flag: '🇲🇾', phone: '+60', currency: 'MYR' },
+            { code: 'MV', name: 'Maldives', flag: '🇲🇻', phone: '+960', currency: 'MVR' },
+            { code: 'ML', name: 'Mali', flag: '🇲🇱', phone: '+223', currency: 'XOF' }, 
+            { code: 'MT', name: 'Malta', flag: '🇲🇹', phone: '+356', currency: 'EUR' },
+            { code: 'MH', name: 'Marshall Islands', flag: '🇲🇭', phone: '+692', currency: 'USD' },
+            { code: 'MQ', name: 'Martinique', flag: '🇲🇶', phone: '+596', currency: 'EUR' },
+            { code: 'MR', name: 'Mauritania', flag: '🇲🇷', phone: '+222', currency: 'MRU' }, 
+            { code: 'MU', name: 'Mauritius', flag: '🇲🇺', phone: '+230', currency: 'MUR' }, 
+            { code: 'YT', name: 'Mayotte', flag: '🇾🇹', phone: '+262', currency: 'EUR' },
+            { code: 'MX', name: 'Mexico', flag: '🇲🇽', phone: '+52', currency: 'MXN' },
+            { code: 'FM', name: 'Micronesia, Federated States of', flag: '🇫🇲', phone: '+691', currency: 'USD' },
+            { code: 'MD', name: 'Moldova', flag: '🇲🇩', phone: '+373', currency: 'MDL' },
+            { code: 'MC', name: 'Monaco', flag: '🇲🇨', phone: '+377', currency: 'EUR' },
+            { code: 'MN', name: 'Mongolia', flag: '🇲🇳', phone: '+976', currency: 'MNT' },
+            { code: 'ME', name: 'Montenegro', flag: '🇲🇪', phone: '+382', currency: 'EUR' },
+            { code: 'MS', name: 'Montserrat', flag: '🇲🇸', phone: '+1-664', currency: 'XCD' },
+            { code: 'MA', name: 'Morocco', flag: '🇲🇦', phone: '+212', currency: 'MAD' }, 
+            { code: 'MZ', name: 'Mozambique', flag: '🇲🇿', phone: '+258', currency: 'MZN' }, 
+            { code: 'MM', name: 'Myanmar', flag: '🇲🇲', phone: '+95', currency: 'MMK' },
+            { code: 'NA', name: 'Namibia', flag: '🇳🇦', phone: '+264', currency: 'NAD' }, 
+            { code: 'NR', name: 'Nauru', flag: '🇳🇷', phone: '+674', currency: 'AUD' },
+            { code: 'NP', name: 'Nepal', flag: '🇳🇵', phone: '+977', currency: 'NPR' },
+            { code: 'NL', name: 'Netherlands', flag: '🇳🇱', phone: '+31', currency: 'EUR' },
+            { code: 'NC', name: 'New Caledonia', flag: '🇳🇨', phone: '+687', currency: 'XPF' },
+            { code: 'NZ', name: 'New Zealand', flag: '🇳🇿', phone: '+64', currency: 'NZD' },
+            { code: 'NI', name: 'Nicaragua', flag: '🇳🇮', phone: '+505', currency: 'NIO' },
+            { code: 'NE', name: 'Niger', flag: '🇳🇪', phone: '+227', currency: 'XOF' }, 
+            { code: 'NG', name: 'Nigeria', flag: '🇳🇬', phone: '+234', currency: 'NGN' }, 
+            { code: 'NU', name: 'Niue', flag: '🇳🇺', phone: '+683', currency: 'NZD' },
+            { code: 'NF', name: 'Norfolk Island', flag: '🇳🇫', phone: '+672', currency: 'AUD' },
+            { code: 'MP', name: 'Northern Mariana Islands', flag: '🇲🇵', phone: '+1-670', currency: 'USD' },
+            { code: 'NO', name: 'Norway', flag: '🇳🇴', phone: '+47', currency: 'NOK' },
+            { code: 'OM', name: 'Oman', flag: '🇴🇲', phone: '+968', currency: 'OMR' },
+            { code: 'PK', name: 'Pakistan', flag: '🇵🇰', phone: '+92', currency: 'PKR' },
+            { code: 'PW', name: 'Palau', flag: '🇵🇼', phone: '+680', currency: 'USD' },
+            { code: 'PS', name: 'Palestine, State of', flag: '🇵🇸', phone: '+970', currency: 'ILS' },
+            { code: 'PA', name: 'Panama', flag: '🇵🇦', phone: '+507', currency: 'PAB' },
+            { code: 'PG', name: 'Papua New Guinea', flag: '🇵🇬', phone: '+675', currency: 'PGK' },
+            { code: 'PY', name: 'Paraguay', flag: '🇵🇾', phone: '+595', currency: 'PYG' },
+            { code: 'PE', name: 'Peru', flag: '🇵🇪', phone: '+51', currency: 'PEN' },
+            { code: 'PH', name: 'Philippines', flag: '🇵🇭', phone: '+63', currency: 'PHP' },
+            { code: 'PN', name: 'Pitcairn', flag: '🇵🇳', phone: '+64', currency: 'NZD' },
+            { code: 'PL', name: 'Poland', flag: '🇵🇱', phone: '+48', currency: 'PLN' },
+            { code: 'PT', name: 'Portugal', flag: '🇵🇹', phone: '+351', currency: 'EUR' },
+            { code: 'PR', name: 'Puerto Rico', flag: '🇵🇷', phone: '+1-787', currency: 'USD' },
+            { code: 'QA', name: 'Qatar', flag: '🇶🇦', phone: '+974', currency: 'QAR' },
+            { code: 'RE', name: 'Réunion', flag: '🇷🇪', phone: '+262', currency: 'EUR' },
+            { code: 'RO', name: 'Romania', flag: '🇷🇴', phone: '+40', currency: 'RON' },
+            { code: 'RU', name: 'Russian Federation', flag: '🇷🇺', phone: '+7', currency: 'RUB' },
+            { code: 'RW', name: 'Rwanda', flag: '🇷🇼', phone: '+250', currency: 'RWF' }, 
+            { code: 'BL', name: 'Saint Barthélemy', flag: '🇧🇱', phone: '+590', currency: 'EUR' },
+            { code: 'SH', name: 'Saint Helena, Ascension and Tristan da Cunha', flag: '🇸🇭', phone: '+290', currency: 'SHP' },
+            { code: 'KN', name: 'Saint Kitts and Nevis', flag: '🇰🇳', phone: '+1-869', currency: 'XCD' },
+            { code: 'LC', name: 'Saint Lucia', flag: '🇱🇨', phone: '+1-758', currency: 'XCD' },
+            { code: 'MF', name: 'Saint Martin (French part)', flag: '🇲🇫', phone: '+590', currency: 'EUR' },
+            { code: 'PM', name: 'Saint Pierre and Miquelon', flag: '🇵🇲', phone: '+508', currency: 'EUR' },
+            { code: 'VC', name: 'Saint Vincent and the Grenadines', flag: '🇻🇨', phone: '+1-784', currency: 'XCD' },
+            { code: 'WS', name: 'Samoa', flag: '🇼🇸', phone: '+685', currency: 'WST' },
+            { code: 'SM', name: 'San Marino', flag: '🇸🇲', phone: '+378', currency: 'EUR' },
+            { code: 'ST', name: 'Sao Tome and Principe', flag: '🇸🇹', phone: '+239', currency: 'STN' }, 
+            { code: 'SA', name: 'Saudi Arabia', flag: '🇸🇦', phone: '+966', currency: 'SAR' },
+            { code: 'SN', name: 'Senegal', flag: '🇸🇳', phone: '+221', currency: 'XOF' }, 
+            { code: 'RS', name: 'Serbia', flag: '🇷🇸', phone: '+381', currency: 'RSD' },
+            { code: 'SC', name: 'Seychelles', flag: '🇸🇨', phone: '+248', currency: 'SCR' }, 
+            { code: 'SL', name: 'Sierra Leone', flag: '🇸🇱', phone: '+232', currency: 'SLL' }, 
+            { code: 'SG', name: 'Singapore', flag: '🇸🇬', phone: '+65', currency: 'SGD' },
+            { code: 'SX', name: 'Sint Maarten (Dutch part)', flag: '🇸🇽', phone: '+1-721', currency: 'ANG' },
+            { code: 'SK', name: 'Slovakia', flag: '🇸🇰', phone: '+421', currency: 'EUR' },
+            { code: 'SI', name: 'Slovenia', flag: '🇸🇮', phone: '+386', currency: 'EUR' },
+            { code: 'SB', name: 'Solomon Islands', flag: '🇸🇧', phone: '+677', currency: 'SBD' },
+            { code: 'SO', name: 'Somalia', flag: '🇸🇴', phone: '+252', currency: 'SOS' }, 
+            { code: 'ZA', name: 'South Africa', flag: '🇿🇦', phone: '+27', currency: 'ZAR' }, 
+            { code: 'SS', name: 'South Sudan', flag: '🇸🇸', phone: '+211', currency: 'SSP' }, 
+            { code: 'ES', name: 'Spain', flag: '🇪🇸', phone: '+34', currency: 'EUR' },
+            { code: 'LK', name: 'Sri Lanka', flag: '🇱🇰', phone: '+94', currency: 'LKR' },
+            { code: 'SD', name: 'Sudan', flag: '🇸🇩', phone: '+249', currency: 'SDG' }, 
+            { code: 'SR', name: 'Suriname', flag: '🇸🇷', phone: '+597', currency: 'SRD' },
+            { code: 'SZ', name: 'Eswatini', flag: '🇸🇿', phone: '+268', currency: 'SZL' }, 
+            { code: 'SE', name: 'Sweden', flag: '🇸🇪', phone: '+46', currency: 'SEK' },
+            { code: 'CH', name: 'Switzerland', flag: '🇨🇭', phone: '+41', currency: 'CHF' },
+            { code: 'SY', name: 'Syrian Arab Republic', flag: '🇸🇾', phone: '+963', currency: 'SYP' },
+            { code: 'TW', name: 'Taiwan', flag: '🇹🇼', phone: '+886', currency: 'TWD' },
+            { code: 'TJ', name: 'Tajikistan', flag: '🇹🇯', phone: '+992', currency: 'TJS' },
+            { code: 'TZ', name: 'Tanzania, United Republic of', flag: '🇹🇿', phone: '+255', currency: 'TZS' }, 
+            { code: 'TH', name: 'Thailand', flag: '🇹🇭', phone: '+66', currency: 'THB' },
+            { code: 'TL', name: 'Timor-Leste', flag: '🇹🇱', phone: '+670', currency: 'USD' },
+            { code: 'TG', name: 'Togo', flag: '🇹🇬', phone: '+228', currency: 'XOF' }, 
+            { code: 'TK', name: 'Tokelau', flag: '🇹🇰', phone: '+690', currency: 'NZD' },
+            { code: 'TO', name: 'Tonga', flag: '🇹🇴', phone: '+676', currency: 'TOP' },
+            { code: 'TT', name: 'Trinidad and Tobago', flag: '🇹🇹', phone: '+1-868', currency: 'TTD' },
+            { code: 'TN', name: 'Tunisia', flag: '🇹🇳', phone: '+216', currency: 'TND' }, 
+            { code: 'TR', name: 'Turkey', flag: '🇹🇷', phone: '+90', currency: 'TRY' },
+            { code: 'TM', name: 'Turkmenistan', flag: '🇹🇲', phone: '+993', currency: 'TMT' },
+            { code: 'TC', name: 'Turks and Caicos Islands', flag: '🇹🇨', phone: '+1-649', currency: 'USD' },
+            { code: 'TV', name: 'Tuvalu', flag: '🇹🇻', phone: '+688', currency: 'AUD' },
+            { code: 'UG', name: 'Uganda', flag: '🇺🇬', phone: '+256', currency: 'UGX' }, 
+            { code: 'UA', name: 'Ukraine', flag: '🇺🇦', phone: '+380', currency: 'UAH' },
+            { code: 'AE', name: 'United Arab Emirates', flag: '🇦🇪', phone: '+971', currency: 'AED' },
+            { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', phone: '+44', currency: 'GBP' },
+            { code: 'US', name: 'United States', flag: '🇺🇸', phone: '+1', currency: 'USD' },
+            { code: 'UY', name: 'Uruguay', flag: '🇺🇾', phone: '+598', currency: 'UYU' },
+            { code: 'UZ', name: 'Uzbekistan', flag: '🇺🇿', phone: '+998', currency: 'UZS' },
+            { code: 'VU', name: 'Vanuatu', flag: '🇻🇺', phone: '+678', currency: 'VUV' },
+            { code: 'VE', name: 'Venezuela', flag: '🇻🇪', phone: '+58', currency: 'VES' },
+            { code: 'VN', name: 'Viet Nam', flag: '🇻🇳', phone: '+84', currency: 'VND' },
+            { code: 'VI', name: 'Virgin Islands, U.S.', flag: '🇻🇮', phone: '+1-340', currency: 'USD' },
+            { code: 'EH', name: 'Western Sahara', flag: '🇪🇭', phone: '+212', currency: 'MAD' }, 
+            { code: 'YE', name: 'Yemen', flag: '🇾🇪', phone: '+967', currency: 'YER' },
+            { code: 'ZM', name: 'Zambia', flag: '🇿🇲', phone: '+260', currency: 'ZMW' }, 
+            { code: 'ZW', name: 'Zimbabwe', flag: '🇿🇼', phone: '+263', currency: 'ZWL' }, 
+        ].sort((a, b) => a.name.localeCompare(b.name)); // Sorted alphabetically
+
+
+        /**
+         * Utility to display a custom message box.
+         * @param {string} message - The message content.
+         * @param {('success'|'error')} type - The type of message.
+         */
+        function showMessageBox(message, type) {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'opacity-0', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'text-green-700');
+            }
+
+            setTimeout(() => messageBox.classList.remove('opacity-0'), 10);
+            setTimeout(() => {
+                messageBox.classList.add('opacity-0');
+                setTimeout(() => messageBox.classList.add('hidden'), 300);
+            }, 5000);
+        }
+
+        /**
+         * Toggles between the Login and Registration forms.
+         * @param {'login'|'register'} formName - The form to show.
+         */
+        window.toggleForm = (formName) => {
+            if (formName === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            }
+            // Clear message box and loading indicator when switching forms
+            messageBox.classList.add('hidden', 'opacity-0');
+            setLoading(false);
+        };
+
+        /**
+         * Sets the loading state.
+         * @param {boolean} isLoading - Whether the app is currently loading/processing.
+         */
+        function setLoading(isLoading) {
+            loadingIndicator.classList.toggle('hidden', !isLoading);
+            loginForm.querySelectorAll('input, button, select').forEach(el => el.disabled = isLoading);
+            registerForm.querySelectorAll('input, button, select').forEach(el => el.disabled = isLoading);
+        }
+
+        /**
+         * Populates the country and currency selectors and sets the initial phone code.
+         */
+        function populateFormSelectors() {
+            // Populate Country Select
+            regCountrySelect.innerHTML = '<option value="" disabled selected>Select your country</option>';
+            COUNTRY_DATA.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.setAttribute('data-phone', country.phone);
+                option.setAttribute('data-currency', country.currency);
+                option.textContent = `${country.flag} ${country.name}`;
+                regCountrySelect.appendChild(option);
+            });
+
+            // Populate Currency Select (unique list)
+            const uniqueCurrencies = [...new Set(COUNTRY_DATA.map(c => c.currency))];
+            regCurrencySelect.innerHTML = '<option value="" disabled selected>Select currency</option>';
+            uniqueCurrencies.sort().forEach(currency => {
+                const option = document.createElement('option');
+                option.value = currency;
+                option.textContent = currency;
+                regCurrencySelect.appendChild(option);
+            });
+
+            // Set a default/initial phone code, e.g., for the United States (+1) or the first country
+            const defaultCountry = COUNTRY_DATA.find(c => c.code === 'US') || COUNTRY_DATA[0];
+            if (defaultCountry) {
+                regPhoneCodeInput.value = defaultCountry.phone;
+            }
+        }
+
+        /**
+         * Handles change event on the country selector to update phone code and currency.
+         */
+        regCountrySelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            // Check if a valid option (not the disabled placeholder) is selected
+            if (selectedOption.value) {
+                const phoneCode = selectedOption.getAttribute('data-phone');
+                const currency = selectedOption.getAttribute('data-currency');
+
+                if (phoneCode) {
+                    regPhoneCodeInput.value = phoneCode;
+                }
+                if (currency) {
+                    regCurrencySelect.value = currency;
+                }
+            }
+        });
+
+        // --- FIREBASE INITIALIZATION ---
+
+        function initializeFirebase() {
+            if (firebaseConfig && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                // setLogLevel('debug'); // Uncomment for debugging
+                console.log("Firebase Initialized successfully.");
+
+                // Listen for Auth state changes
+                onAuthStateChanged(auth, handleAuthStateChange);
+
+                // Attempt custom token sign-in if provided
+                if (initialAuthToken) {
+                    console.log("Attempting sign-in with initial custom token...");
+                    signInWithCustomToken(auth, initialAuthToken).catch(error => {
+                        console.error("Custom token sign-in failed:", error);
+                        showMessageBox("Failed to auto-sign in. Please log in manually.", 'error');
+                    });
+                }
+            } else {
+                console.warn("Firebase configuration is missing or using placeholders. Authentication features are disabled.");
+                statusText.textContent = "Authentication is currently disabled due to missing Firebase configuration.";
+                authStatus.classList.remove('hidden');
+            }
+        }
+
+        // --- AUTH STATE HANDLER ---
+
+        /**
+         * Handles changes in the user's authentication state.
+         * @param {Object} user - The current Firebase user object or null.
+         */
+        function handleAuthStateChange(user) {
+            if (user) {
+                // User is signed in
+                statusText.textContent = "You are currently signed in.";
+                userInfo.innerHTML = `
+                    **UID:** ${user.uid}<br>
+                    **Email:** ${user.email || 'N/A'}<br>
+                    **Provider:** ${user.providerData[0]?.providerId || 'Anonymous'}
+                `;
+                authStatus.classList.remove('hidden');
+                signOutBtn.classList.remove('hidden');
+                
+                // Hide forms and show status
+                loginForm.classList.add('hidden');
+                registerForm.classList.add('hidden');
+
+            } else {
+                // User is signed out
+                statusText.textContent = "You are currently signed out. Please sign in or register.";
+                userInfo.textContent = "";
+                authStatus.classList.remove('hidden');
+                signOutBtn.classList.add('hidden');
+                
+                // Show the default login form
+                toggleForm('login');
+            }
+            setLoading(false);
+        }
+
+        // --- AUTH ACTION HANDLERS ---
+
+        /**
+         * Handles the login form submission.
+         * @param {Event} e - The form submit event.
+         */
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            setLoading(true);
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                showMessageBox(`Successfully logged in as ${userCredential.user.email}!`, 'success');
+            } catch (error) {
+                console.error("Login Error:", error);
+                showMessageBox(error.message || "Login failed. Please check your email and password.", 'error');
+                setLoading(false);
+            }
+        });
+
+        /**
+         * Handles the registration form submission.
+         * @param {Event} e - The form submit event.
+         */
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            setLoading(true);
+
+            const fullName = document.getElementById('reg-full-name').value;
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            const countryCode = regCountrySelect.value;
+            const currency = regCurrencySelect.value;
+            const phoneCode = regPhoneCodeInput.value;
+            const phoneNumber = regPhoneNumberInput.value;
+
+            if (password !== confirmPassword) {
+                showMessageBox("Passwords do not match.", 'error');
+                setLoading(false);
+                return;
+            }
+
+            if (!countryCode || !currency) {
+                showMessageBox("Please select your country and currency.", 'error');
+                setLoading(false);
+                return;
+            }
+
+            try {
+                // 1. Create user in Firebase Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Save additional user data to Firestore
+                const userData = {
+                    uid: user.uid,
+                    fullName: fullName,
+                    username: username,
+                    email: email,
+                    countryCode: countryCode,
+                    currency: currency,
+                    phoneNumber: `${phoneCode}${phoneNumber}`,
+                    createdAt: new Date(),
+                    // Add other fields as needed
+                };
+
+                // Note: Ensure you have initialized Firestore (db) and have permissions set correctly.
+                await setDoc(doc(db, "users", user.uid), userData);
+
+                showMessageBox("Registration successful! You are now logged in.", 'success');
+            } catch (error) {
+                console.error("Registration Error:", error);
+                showMessageBox(error.message || "Registration failed. Please try again.", 'error');
+                setLoading(false);
+            }
+        });
+
+        /**
+         * Handles user sign out.
+         */
+        window.handleSignOut = async () => {
+            setLoading(true);
+            try {
+                await signOut(auth);
+                showMessageBox("Successfully signed out.", 'success');
+                // State change will be handled by onAuthStateChanged listener
+            } catch (error) {
+                console.error("Sign Out Error:", error);
+                showMessageBox("Sign out failed.", 'error');
+                setLoading(false);
+            }
+        };
+
+        // --- MAIN EXECUTION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFormSelectors();
+            initializeFirebase();
+        });
+    </script>
+</body>
+</html>

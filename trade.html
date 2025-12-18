@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite Exchange – Arbitrage</title>
+
+<style>
+:root{
+--bg:#020617;
+--card:#0f172a;
+--card2:#111827;
+--text:#e5e7eb;
+--muted:#9ca3af;
+--green:#22c55e;
+--red:#ef4444;
+--blue:#3b82f6;
+}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:var(--bg);color:var(--text)}
+.app{max-width:430px;margin:auto;padding-bottom:90px}
+
+.card{
+background:linear-gradient(180deg,var(--card),var(--card2));
+margin:12px;
+padding:14px;
+border-radius:16px;
+box-shadow:0 6px 20px rgba(0,0,0,.4)
+}
+
+h3{margin:0 0 10px;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:8px;border-bottom:1px solid #1f2937}
+th{color:var(--muted)}
+
+button{
+border:none;
+border-radius:10px;
+padding:8px 12px;
+background:var(--blue);
+color:white;
+cursor:pointer
+}
+
+input,select{
+width:100%;
+padding:10px;
+border-radius:10px;
+background:#020617;
+border:1px solid #1f2937;
+color:white
+}
+
+.view{display:none}
+
+.nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:#020617;
+display:flex;
+justify-content:space-around;
+padding:12px 0
+}
+
+.nav div{
+font-size:12px;
+cursor:pointer;
+color:var(--muted)
+}
+
+.nav .active{color:var(--blue)}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<!-- ================= DASHBOARD (UNCHANGED) ================= -->
+<div id="dashboard" class="view">
+  <div class="card">
+    <h3>Dashboard</h3>
+    <p style="font-size:12px;color:var(--muted)">
+      Live arbitrage monitoring system
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>System Status</h3>
+    <p style="font-size:12px">Exchanges Connected: 4</p>
+    <p style="font-size:12px">Price Feeds: Active</p>
+    <p style="font-size:12px;color:var(--green)">Latency: Stable</p>
+  </div>
+</div>
+
+<!-- ================= OPPORTUNITIES (UPDATED) ================= -->
+<div id="opportunities" class="view">
+
+  <!-- Arbitrage Opportunities -->
+  <div class="card">
+    <h3>Arbitrage Opportunities</h3>
+
+    Min Profit %
+    <input id="minProfit" type="number" value="0.2">
+
+    <table>
+      <thead>
+        <tr>
+          <th>Buy</th>
+          <th>Sell</th>
+          <th>Profit %</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="oppTable"></tbody>
+    </table>
+  </div>
+
+  <!-- ===== MANUAL BUY / SELL CARD (NEW) ===== -->
+  <div class="card" id="manualTradeCard">
+    <h3>Manual Trade</h3>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <div>
+        <label style="font-size:12px;color:var(--muted)">Pair</label>
+        <select id="tradePair">
+          <option>BTC / USD</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size:12px;color:var(--muted)">Amount ($)</label>
+        <input id="tradeAmount" type="number" value="100">
+      </div>
+
+      <div style="display:flex;gap:12px">
+        <button style="flex:1;background:var(--green)" onclick="manualTrade('buy')">
+          BUY
+        </button>
+        <button style="flex:1;background:var(--red)" onclick="manualTrade('sell')">
+          SELL
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= TRADES (UNCHANGED) ================= -->
+<div id="trades" class="view">
+  <div class="card">
+    <h3>Recent Trades</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Buy</th>
+          <th>Sell</th>
+          <th>PnL</th>
+        </tr>
+      </thead>
+      <tbody id="tradeTable"></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<!-- ================= NAV ================= -->
+<div class="nav">
+  <div class="active" onclick="showView('dashboard',this)">Dashboard</div>
+  <div onclick="showView('opportunities',this)">Opportunities</div>
+  <div onclick="showView('trades',this)">Trades</div>
+</div>
+
+<script>
+/* ================= STATE ================= */
+const EXCHANGES=["Binex","KrakenX","GatePro","CoinArena"];
+let prices={}, trades=[];
+let currentView="dashboard";
+
+/* ================= INIT ================= */
+EXCHANGES.forEach(e=>prices[e]=60000+Math.random()*400);
+
+/* ================= VIEW SWITCH ================= */
+function showView(id,el){
+document.querySelectorAll(".view").forEach(v=>v.style.display="none");
+document.getElementById(id).style.display="block";
+document.querySelectorAll(".nav div").forEach(n=>n.classList.remove("active"));
+el.classList.add("active");
+currentView=id;
+render();
+}
+
+/* ================= OPPORTUNITIES ================= */
+function renderOpportunities(){
+const tbody=document.getElementById("oppTable");
+tbody.innerHTML="";
+const minPct=parseFloat(document.getElementById("minProfit").value);
+
+EXCHANGES.forEach(b=>{
+EXCHANGES.forEach(s=>{
+if(b===s)return;
+const pct=((prices[s]-prices[b])/prices[b])*100;
+if(pct>=minPct){
+tbody.innerHTML+=`
+<tr>
+<td>${b}</td>
+<td>${s}</td>
+<td style="color:var(--green)">${pct.toFixed(2)}%</td>
+<td>
+  <button onclick="selectOpportunityPair('${b}','${s}')">Select</button>
+</td>
+</tr>`;
+}
+});
+});
+}
+
+/* ================= PAIR SELECTION ================= */
+function selectOpportunityPair(buy,sell){
+const pair=document.getElementById("tradePair");
+pair.innerHTML=`<option>BTC / USD (${buy} → ${sell})</option>`;
+pair.dataset.buy=buy;
+pair.dataset.sell=sell;
+document.getElementById("manualTradeCard")
+.scrollIntoView({behavior:"smooth"});
+}
+
+/* ================= MANUAL TRADE ================= */
+function manualTrade(side){
+const pair=document.getElementById("tradePair");
+const usd=parseFloat(document.getElementById("tradeAmount").value);
+
+if(!pair.dataset.buy) return alert("Select an opportunity first");
+if(!usd || usd<=0) return alert("Invalid amount");
+
+const price = side==="buy"
+  ? prices[pair.dataset.buy]
+  : prices[pair.dataset.sell];
+
+const btc = usd / price;
+
+trades.unshift({
+time:new Date().toLocaleTimeString(),
+buy:pair.dataset.buy,
+sell:pair.dataset.sell,
+profit:(prices[pair.dataset.sell]-prices[pair.dataset.buy])*btc
+});
+
+render();
+}
+
+/* ================= TRADES ================= */
+function renderTrades(){
+const t=document.getElementById("tradeTable");
+t.innerHTML="";
+trades.forEach(tr=>{
+t.innerHTML+=`
+<tr>
+<td>${tr.time}</td>
+<td>${tr.buy}</td>
+<td>${tr.sell}</td>
+<td style="color:var(--green)">
+  ${tr.profit.toFixed(2)}
+</td>
+</tr>`;
+});
+}
+
+/* ================= RENDER ================= */
+function render(){
+if(currentView==="opportunities") renderOpportunities();
+if(currentView==="trades") renderTrades();
+}
+
+/* ================= PRICE LOOP ================= */
+setInterval(()=>{
+EXCHANGES.forEach(e=>{
+prices[e]+=Math.random()*80-40;
+});
+render();
+},1500);
+
+/* INIT */
+showView("dashboard",document.querySelector(".nav div"));
+</script>
+</body>
+</html>

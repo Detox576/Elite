@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name - Link in Bio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <style>
+        /* CSS to create the dark grid pattern background, matching the reference image */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            color: #f0f0f0; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: #1a1a1a; /* Dark background */
+            
+            /* GRID PATTERN STYLES */
+            background-image: linear-gradient(0deg, transparent 99%, #333 100%),
+                              linear-gradient(90deg, transparent 99%, #333 100%);
+            background-size: 25px 25px; 
+            background-position: center center;
+            background-repeat: repeat;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 50px;
+            padding: 30px 20px 100px 20px; 
+            text-align: center;
+            background: transparent; 
+            box-shadow: none; 
+        }
+
+        /* Profile Image: Using your file path and keeping the circular design with a subtle glow */
+        .profile-pic {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff; 
+            box-shadow: 0 0 15px rgba(100, 0, 255, 0.5); 
+            margin-bottom: 10px;
+        }
+
+        /* Profile Text: Using your content but the reference's styling */
+        .profile-handle {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #ffffff; 
+        }
+
+        /* Tagline with the Charming Affiliate Bio */
+        .profile-tagline {
+            font-size: 1rem;
+            color: #ccc; 
+            margin-bottom: 25px;
+        }
+
+        /* Social Icons Row */
+        .social-icons {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 2rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: #a057ff; 
+        }
+        
+        /* --- Links Container --- */
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Link Button Styling (Dark gray/black button from the reference image) */
+        .link-button {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; 
+            
+            background-color: #333333; 
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid #555; 
+            position: relative;
+        }
+
+        .link-button:hover {
+            background-color: #444444;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Custom styles for the ICON on the left of the button */
+        .link-button .fa-icon {
+            font-size: 1.8rem; 
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin-right: 15px;
+            color: white; 
+        }
+        
+        /* Icon Colors */
+        .whatsapp .fa-icon { color: #25D366; }
+        .instagram .fa-icon { color: #E1306C; }
+        .tiktok .fa-icon { color: #000000; background-color: white; padding: 5px; } 
+        .website .fa-icon { color: #5500AA; } 
+
+
+        /* Button Text Styling */
+        .link-button span {
+            flex-grow: 1; 
+            text-align: left; 
+        }
+        
+        /* Footer Banner */
+        .footer-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #222;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+
+        @media (min-width: 540px) {
+            .footer-banner {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 500px; 
+            }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <img src="Profile.jpg" alt="Profile Picture" class="profile-pic">
+        
+        <h1 class="profile-handle">@auto.crave</h1>
+        <p class="profile-tagline">
+            Your friendly guide to smart trading! ✨ *Tap the button below to meet me on all my platforms!** 👇
+        </p>
+
+        <div class="social-icons">
+            <a href="https://www.instagram.com/mentor_denny?igsh=c3Q4eHR4eWVkeDln" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://vm.tiktok.com/ZMHwGt16X2YkS-q2hVJ/" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://wa.me/254790164860" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+
+
+        <div class="links-container">
+            
+            <a href="https://wa.me/254790164860" class="link-button whatsapp" target="_blank">
+                <i class="fab fa-whatsapp fa-icon"></i>
+                <span>WHATSAPP ME</span>
+            </a>
+
+            <a href="https://www.instagram.com/mentor_denny?igsh=c3Q4eHR4eWVkeDln" class="link-button instagram" target="_blank">
+                <i class="fab fa-instagram fa-icon"></i>
+                <span>FOLLOW ME ON INSTAGRAM</span>
+            </a>
+
+            <a href="https://vm.tiktok.com/ZMHwGt16X2YkS-q2hVJ/" class="link-button tiktok" target="_blank">
+                <i class="fab fa-tiktok fa-icon"></i>
+                <span>Follow </span>
+            </a>
+
+            <a href="https://tradesmartorganization.club/register/69341ac0c8570" class="link-button website" target="_blank">
+                <i class="fas fa-globe fa-icon"></i>
+                <span>CREAT TRADESMART ACCOUNT</span>
+            </a>
+            
+        </div>
+        
+    </div>
+
+    <div class="footer-banner">
+        
+    </div>
+
+</body>
+</html>
